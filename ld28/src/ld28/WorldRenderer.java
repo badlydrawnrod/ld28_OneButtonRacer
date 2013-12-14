@@ -3,10 +3,12 @@ package ld28;
 import java.util.List;
 
 import ldtk.Camera;
+import ldtk.Image;
 import ldtk.Kernel;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class WorldRenderer {
@@ -14,11 +16,13 @@ public class WorldRenderer {
 	private World world;
 	private Camera gameCam;
 	private TrackRenderer trackRenderer;
+	private CarRenderer carRenderer;
 
 	public WorldRenderer(World world, Camera gameCam) {
 		this.world = world;
 		this.gameCam = gameCam;
 		trackRenderer = new TrackRenderer(world.track());
+		carRenderer = new CarRenderer(world.cars());
 	}
 
 	public void setup() {
@@ -27,6 +31,7 @@ public class WorldRenderer {
 	public void draw() {
 		gameCam.activate();
 		trackRenderer.draw();
+		carRenderer.draw();
 	}
 }
 
@@ -35,7 +40,7 @@ class TrackRenderer {
 
 	private static final int VERTS_PER_QUAD = 20;
 	private static final int QUADS_PER_PIECE = 4;
-	private static final float TRACK_WIDTH = 60;
+	private static final float TRACK_WIDTH = 72;
 
 	private int quadIndex;
 	private float[] verts;
@@ -109,5 +114,23 @@ class TrackRenderer {
 	
 	public void draw() {
 		Kernel.batch.draw(texture, verts, 0, verts.length);
+	}
+}
+
+
+class CarRenderer {
+	private Image carImage;
+	private List<Car> cars;
+
+	public CarRenderer(List<Car> cars) {
+		this.cars = cars;
+		carImage = Kernel.images.get("atlases/pack/8x8");
+	}
+	
+	public void draw() {
+		for (int i = 0, n = cars.size(); i < n; i++) {
+			Car car = cars.get(i);
+			carImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+		}
 	}
 }

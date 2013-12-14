@@ -18,7 +18,7 @@
 		<link>
 			<name>assets</name>
 			<type>2</type>
-			<locationURI>copy_PARENT/ldtk-demo1-android/assets</locationURI>
+			<location>R:/Projects/LD28/ld28-android/assets</location>
 		</link>
 	</linkedResources>
 	<variableList>

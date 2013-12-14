@@ -3,6 +3,8 @@ package ld28;
 import java.util.ArrayList;
 import java.util.List;
 
+import ldtk.Kernel;
+
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
@@ -10,14 +12,24 @@ import com.badlogic.gdx.math.Vector2;
 public class World {
 
 	private String oval = "ssLLsLLssllllllllssLLsLLss";
+//	private String oval = "ssllsllssssllsllss";
 	private TrackBuilder track;
+	private List<Car> cars;
 	
 	public World() {
 		track = generateTrack(oval);
+		cars = new ArrayList<Car>();
+		for (int i = 0; i < 10; i++) {
+			cars.add(new Car(track, MathUtils.random(1000), MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
+		}
 	}
 	
 	public TrackBuilder track() {
 		return track;
+	}
+	
+	public List<Car> cars() {
+		return cars;
 	}
 
 	private TrackBuilder generateTrack(String trackDef) {
@@ -48,6 +60,10 @@ public class World {
 	}
 
 	public void update() {
+		for (int i = cars.size() - 1; i >= 0; i--) {
+			Car car = cars.get(i);
+			car.update();
+		}
 	}
 }
 
@@ -244,5 +260,59 @@ class TurnPiece extends TrackPiece {
 			v.y += laneRadius * Math.sin(angle);
 		}
 		return v;
+	}
+}
+
+
+class Car {
+	private TrackBuilder track;
+	private float lane;
+	private float distance;
+	private Vector2 position;
+	private float angle;
+	private float speed;
+
+	public Car(TrackBuilder track, float distance, float lane, float speed) {
+		this.track = track;
+		this.lane = lane;
+		this.distance = distance;
+		this.speed = speed;
+		position = new Vector2();
+		updatePosition();
+	}
+	
+	public void update() {
+		distance += Kernel.time.delta * speed;
+		updatePosition();
+	}
+	
+	private void updatePosition() {
+		List<TrackPiece> pieces = track.pieces();
+		float accumulatedDistance = 0;
+		while (accumulatedDistance < distance) {
+			for (int i = 0; i < pieces.size(); i++) {
+				TrackPiece piece = pieces.get(i);
+				accumulatedDistance += piece.length(lane);
+				if (accumulatedDistance >= distance) {
+					float d = distance - (accumulatedDistance - piece.length(lane));
+					position.set(piece.positionAt(d, lane));
+					angle = piece.angleAt(d, lane);
+					break;
+				}
+			}
+		}
+		// TODO: stop it from getting slower and slower as the car loops.
+	}
+	
+	public float x() {
+		return position.x;
+	}
+	
+	public float y() {
+		return position.y;
+	}
+	
+	public float angle() {
+		return angle;
 	}
 }
