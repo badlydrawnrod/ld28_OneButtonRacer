@@ -19,7 +19,8 @@ public class World {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
 		for (int i = 0; i < 10; i++) {
-			cars.add(new Car(track, MathUtils.random(1000), MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
+			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
+			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
 		}
 	}
 	
@@ -315,12 +316,14 @@ class Car {
 	private float angle;
 	private float speed;
 	private int layer;
+	private int pieceIndex;
 
-	public Car(TrackBuilder track, float distance, float lane, float speed) {
+	public Car(TrackBuilder track, int pieceIndex, float lane, float speed) {
 		this.track = track;
 		this.lane = lane;
-		this.distance = distance;
+		this.distance = 0;
 		this.speed = speed;
+		this.pieceIndex = pieceIndex;
 		position = new Vector2();
 		updatePosition();
 	}
@@ -332,21 +335,15 @@ class Car {
 	
 	private void updatePosition() {
 		List<TrackPiece> pieces = track.pieces();
-		float accumulatedDistance = 0;
-		while (accumulatedDistance < distance) {
-			for (int i = 0; i < pieces.size(); i++) {
-				TrackPiece piece = pieces.get(i);
-				accumulatedDistance += piece.length(lane);
-				if (accumulatedDistance >= distance) {
-					float d = distance - (accumulatedDistance - piece.length(lane));
-					position.set(piece.positionAt(d, lane));
-					angle = piece.angleAt(d, lane);
-					layer = piece.layer();
-					break;
-				}
-			}
+		TrackPiece piece = pieces.get(pieceIndex);
+		while (distance >= piece.length(lane)) {
+			distance -= piece.length(lane);
+			pieceIndex = (pieceIndex + 1) % pieces.size();
+			piece = pieces.get(pieceIndex);
 		}
-		// TODO: stop it from getting slower and slower as the car loops.
+		position.set(piece.positionAt(distance, lane));
+		angle = piece.angleAt(distance, lane);
+		layer = piece.layer();
 	}
 	
 	public float x() {
