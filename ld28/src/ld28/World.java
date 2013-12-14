@@ -11,8 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 
 public class World {
 
-	private String oval = "ssLLsLLssllllllllssLLsLLss";
-//	private String oval = "ssllsllssssllsllss";
+	private String oval = "ssLLsLLssllll+llllss-LLsLLss";
 	private TrackBuilder track;
 	private List<Car> cars;
 	
@@ -37,6 +36,12 @@ public class World {
 		for (int i = 0, n = trackDef.length(); i < n; i++) {
 			char c = trackDef.charAt(i);
 			switch (c) {
+			case '+':
+				trackBuilder.up();
+				break;
+			case '-':
+				trackBuilder.down();
+				break;
 			case 's':
 				trackBuilder.addStraight(100);
 				break;
@@ -68,10 +73,14 @@ public class World {
 }
 
 class TrackBuilder {
+	public static final int NUM_LAYERS = 5;
+	
+	private int layer;
 	private Vector2 pos;
 	private float angle;
 
 	private List<TrackPiece> pieces;
+	private int[] piecesByLayer;
 	
 	public TrackBuilder() {
 		this(0, 0, 0);
@@ -81,40 +90,72 @@ class TrackBuilder {
 		this.pos = new Vector2(x, y);
 		this.angle = angle;
 		pieces = new ArrayList<TrackPiece>();
+		piecesByLayer = new int[NUM_LAYERS];
+		layer = 0;
 	}
 	
 	public List<TrackPiece> pieces() {
 		return pieces;
 	}
 	
+	public int piecesOnLayer(int layer) {
+		return piecesByLayer[layer];
+	}
+	
 	public TrackBuilder addStraight(float length) {
-		TrackPiece piece = new StraightPiece(pos, angle, length);
+		TrackPiece piece = new StraightPiece(layer, pos, angle, length);
 		pos.set(piece.positionAtEnd());
 		pieces.add(piece);
+		piecesByLayer[layer]++;
 		return this;
 	}
 	
 	public TrackBuilder addTurn(float angle, float radius) {
-		TrackPiece piece = new TurnPiece(pos, this.angle, this.angle + angle, radius);
+		TrackPiece piece = new TurnPiece(layer, pos, this.angle, this.angle + angle, radius);
 		pos.set(piece.positionAtEnd());
 		this.angle += angle;
 		pieces.add(piece);
+		piecesByLayer[layer]++;
+		return this;
+	}
+	
+	public TrackBuilder up() {
+		if (layer < NUM_LAYERS - 1) {
+			++layer;
+		}
+		return this;
+	}
+	
+	public TrackBuilder down() {
+		if (layer > 0) {
+			--layer;
+		}
 		return this;
 	}
 }
 
 
 abstract class TrackPiece {
+	
 	protected Vector2 startPos;
 	protected Vector2 endPos;
+	private final int layer;
 
+	public TrackPiece(int layer) {
+		this.layer = layer;
+	}
+
+	public int layer() {
+		return layer;
+	}
+	
 	public abstract float length(float lane);
-
 	public abstract float angleAtStart();
 	public abstract float angleAtEnd();
 	
 	public abstract float angleAt(float length, float lane);
 	public abstract Vector2 positionAt(float length, float lane);
+
 	
 	public Vector2 positionAtStart(float lane) {
 		Vector2 v = new Vector2(positionAtStart());
@@ -146,7 +187,8 @@ class StraightPiece extends TrackPiece {
 	private float angle;
 	private float length;
 	
-	public StraightPiece(Vector2 pos, float angle, float length) {
+	public StraightPiece(int layer, Vector2 pos, float angle, float length) {
+		super(layer);
 		this.startPos = new Vector2(pos);
 		this.angle = angle;
 		this.length = length;
@@ -191,7 +233,8 @@ class TurnPiece extends TrackPiece {
 	private float endAngle;
 	private float radius;
 
-	public TurnPiece(Vector2 pos, float startAngle, float endAngle, float radius) {
+	public TurnPiece(int layer, Vector2 pos, float startAngle, float endAngle, float radius) {
+		super(layer);
 		this.startPos = new Vector2(pos);
 		this.startAngle = startAngle;
 		this.endAngle = endAngle;
@@ -271,6 +314,7 @@ class Car {
 	private Vector2 position;
 	private float angle;
 	private float speed;
+	private int layer;
 
 	public Car(TrackBuilder track, float distance, float lane, float speed) {
 		this.track = track;
@@ -297,6 +341,7 @@ class Car {
 					float d = distance - (accumulatedDistance - piece.length(lane));
 					position.set(piece.positionAt(d, lane));
 					angle = piece.angleAt(d, lane);
+					layer = piece.layer();
 					break;
 				}
 			}
@@ -314,5 +359,9 @@ class Car {
 	
 	public float angle() {
 		return angle;
+	}
+	
+	public int layer() {
+		return layer;
 	}
 }
