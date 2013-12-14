@@ -5,6 +5,8 @@ import java.util.List;
 
 import ldtk.Kernel;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
@@ -18,10 +20,11 @@ public class World {
 	public World() {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
-		for (int i = 0; i < 10; i++) {
-			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
-			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
-		}
+//		for (int i = 0; i < 10; i++) {
+//			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
+//			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
+//		}
+		cars.add(new PlayerCar(Keys.SPACE, track, 0, 0, 400));
 	}
 	
 	public TrackBuilder track() {
@@ -309,14 +312,14 @@ class TurnPiece extends TrackPiece {
 
 
 class Car {
-	private TrackBuilder track;
-	private float lane;
-	private float distance;
+	protected TrackBuilder track;
+	protected float lane;
+	protected float distance;
 	private Vector2 position;
 	private float angle;
-	private float speed;
+	protected float speed;
 	private int layer;
-	private int pieceIndex;
+	protected int pieceIndex;
 
 	public Car(TrackBuilder track, int pieceIndex, float lane, float speed) {
 		this.track = track;
@@ -360,5 +363,36 @@ class Car {
 	
 	public int layer() {
 		return layer;
+	}
+}
+
+
+class PlayerCar extends Car {
+	private int key;
+	private float direction = 1.0f;
+	private float currentSlot;
+	private float maxSlot = 2;
+	private boolean isKeyPressed;
+	
+	public PlayerCar(int key, TrackBuilder track, int pieceIndex, float lane, float speed) {
+		super(track, pieceIndex, lane, speed);
+		this.key = key;
+		this.currentSlot = 0;
+	}
+	
+	public void update() {
+		boolean wasKeyPressed = isKeyPressed;
+		isKeyPressed = Gdx.input.isKeyPressed(key);
+		if (wasKeyPressed && !isKeyPressed) {
+			if ((currentSlot + direction > maxSlot) || (currentSlot + direction < -maxSlot)) {
+				direction = -direction;
+			}
+			currentSlot += direction;
+			float newLane = 16 * currentSlot;	// TODO: magic!
+			TrackPiece piece = track.pieces().get(pieceIndex);
+			distance *= piece.length(newLane) / piece.length(lane);
+			lane = newLane;
+		}
+		super.update();
 	}
 }
