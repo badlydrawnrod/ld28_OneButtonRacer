@@ -3,6 +3,7 @@ package ld28;
 import java.util.List;
 
 import ldtk.Camera;
+import ldtk.Font;
 import ldtk.Image;
 import ldtk.Kernel;
 

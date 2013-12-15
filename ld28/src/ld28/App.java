@@ -20,8 +20,9 @@ public class App implements StateSelector {
 		return state;
 	}
 	
-	public void requestPlaying() {
+	public void requestPlaying(boolean isTwoPlayer) {
 		if (state == menu) {
+			playing.setTwoPlayer(isTwoPlayer);
 			state = playing;
 		}
 	}

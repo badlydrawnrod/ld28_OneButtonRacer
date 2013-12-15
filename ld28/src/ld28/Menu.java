@@ -15,9 +15,12 @@ public class Menu extends State {
 	private final App app;
 	private Camera guiCam;
 	private Font font;
-	private boolean isSpacePressed;
+	private boolean isOnePressed;
 	private boolean isEscapePressed;
-	private String pressSpace = "Press Space or Tap to play";
+	private String startInstructions = "Press [1] or [2] to select the number of players";
+	private String firstLine = "Player 1 (red car) - press 'A' to change lanes";
+	private String secondLine = "Player 2 (blue car) - press 'L' to change lanes";
+	private boolean isTwoPressed;
 
 	public Menu(App app) {
 		this.app = app;
@@ -36,10 +39,15 @@ public class Menu extends State {
 
 	@Override
 	public void update() {
-		boolean wasSpacePressed = isSpacePressed;
-		isSpacePressed = Gdx.input.isKeyPressed(Keys.SPACE);
-		if ((wasSpacePressed && !isSpacePressed) || Gdx.input.justTouched()) {
-			app.requestPlaying();
+		boolean wasOnePressed = isOnePressed;
+		isOnePressed = Gdx.input.isKeyPressed(Keys.NUM_1);
+		if ((wasOnePressed && !isOnePressed)) {
+			app.requestPlaying(false);
+		}
+		boolean wasTwoPressed = isTwoPressed;
+		isTwoPressed = Gdx.input.isKeyPressed(Keys.NUM_2);
+		if ((wasTwoPressed && !isTwoPressed)) {
+			app.requestPlaying(true);
 		}
 		boolean wasEscapePressed = isEscapePressed;
 		isEscapePressed = Gdx.input.isKeyPressed(Keys.ESCAPE);
@@ -51,9 +59,13 @@ public class Menu extends State {
 	@Override
 	public void draw() {
 		guiCam.activate();
-		Rectangle rect = font.bounds(pressSpace);
+		Rectangle rect = font.bounds(startInstructions);
 		float x = -rect.width / 2;
 		float y = -rect.height / 2;
-		font.draw(pressSpace, x, y, Color.WHITE);
+		font.draw(startInstructions, x, y, Color.WHITE);
+		y -= rect.height * 2;
+		font.draw(firstLine, x, y, Color.WHITE);
+		y -= rect.height * 2;
+		font.draw(secondLine, x, y, Color.WHITE);
 	}
 }

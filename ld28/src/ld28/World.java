@@ -31,8 +31,12 @@ public class World {
 	private Sound startSound;
 	private boolean isStartSoundPlaying;
 	private float startingTime;
+	private long player1Score;
+	private long player2Score;
+	private boolean isTwoPlayer;
 
-	public World() {
+	public World(boolean isTwoPlayer) {
+		this.isTwoPlayer = isTwoPlayer;
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
 		String trackLenStr = oval.replace("+", "");
@@ -48,9 +52,10 @@ public class World {
 		
 		player1 = new PlayerCar(1, Keys.A, track, 0, -1, 500);
 		cars.add(player1);
-		player2 = new PlayerCar(2, Keys.L, track, 0,  1, 500);
-		cars.add(player2);
-		
+		if (isTwoPlayer) {
+			player2 = new PlayerCar(2, Keys.L, track, 0,  1, 500);
+			cars.add(player2);
+		}
 		overtakingSound = Kernel.sounds.get("sounds/overtake");
 		startSound = Kernel.sounds.get("sounds/startrace");
 		isStartSoundPlaying = false;
@@ -114,6 +119,7 @@ public class World {
 			updateCars();
 			updateCollisions();
 			checkForOvertaking();
+			updateScores();
 		}
 	}
 
@@ -153,6 +159,21 @@ public class World {
 				overtakingSound.play();
 			}
 		}
+	}
+	
+	private void updateScores() {
+		player1Score += player1.speed * Kernel.time.delta;
+		if (isTwoPlayer) {
+			player2Score += player2.speed * Kernel.time.delta;
+		}
+	}
+	
+	public long player1Score() {
+		return player1Score;
+	}
+	
+	public long player2Score() {
+		return player2Score;
 	}
 }
 
