@@ -83,10 +83,13 @@ public class World {
 			Car car = cars.get(i);
 			for (int j = i + 1; j < n; j++) {
 				Car other = cars.get(j);
-				if (car.hit(other)) {
-					car.setSpeed(0);
-					other.setSpeed(0);
-					System.out.println("Car " + car + " hit " + other);
+				switch (car.hit(other)) {
+				case 1:
+					other.onRanInto(car);
+					break;
+				case -1:
+					car.onRanInto(other);
+					break;
 				}
 			}
 		}
@@ -400,18 +403,36 @@ class Car {
 		return layer;
 	}
 	
-	public boolean hit(Car other) {
-		if (!Polys.hit(poly, other.poly)) {
-			return false;
+	public int hit(Car other) {
+		// Throw out non-collisions.
+		if (!Polys.hit(poly, other.poly) || (Math.abs(pieceIndex - other.pieceIndex) > 1)) {
+			return 0;
 		}
-		if (Math.abs(pieceIndex - other.pieceIndex) > 1) {
-			return false;
+
+		// Now we know we had a collision.
+		
+		int numPieces = track.pieces().size();
+		if (pieceIndex == (other.pieceIndex + 1) % numPieces) {
+			// We're ahead of the other car by one piece, so they shunted us.
+			return 1;
 		}
-		return true;
+		else if ((pieceIndex + 1) % numPieces == other.pieceIndex) {
+			// We're behind the other car by one piece, so we shunted them.
+			return -1;
+		}
+		
+		// We're on the same track piece, so it's all down to distance.
+		return (distance >= other.distance) ? 1: -1;
+		
+		// TODO: what if we're in different lanes? This code assumes same lane.
 	}
 	
 	public void setSpeed(float speed) {
 		this.speed = speed;
+	}
+	
+	public void onRanInto(Car other) {
+		speed *= 0.5f;
 	}
 }
 
