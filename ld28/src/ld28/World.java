@@ -14,24 +14,29 @@ import com.badlogic.gdx.math.Vector2;
 
 public class World {
 
-	private static final float STRAIGHT_SIZE = 160;
+	private static final float SMALL_STRAIGHT_SIZE = 120;
 	private static final float SMALL_CURVE_RADIUS = 120;
-	private static final float LARGE_CURVE_RADIUS = 160;
-	private static final int NUM_CARS = 30;
-	
+	private static final float LARGE_STRAIGHT_SIZE = 192;
+	private static final float LARGE_CURVE_RADIUS = 192;
 	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
+//	private String oval = "ssLLsLLssLLsLL";
+//	private String oval = "sllllsssrrrrrrssll";
+//	private String oval = "sllllssllrrRRsrrsssssRRrrsllll";
 	private TrackBuilder track;
 	private List<Car> cars;
-	
+
 	public World() {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
+		String trackLenStr = oval.replace("+", "");
+		trackLenStr = trackLenStr.replace("+", "");
+		int numCars = (int)(trackLenStr.length() * 0.8f);
 		
 		// Spawn the computer cars, avoiding piece 0 so that the players don't get screwed.
 		final int margin = 2;
-		for (int i = 0; i < NUM_CARS; i++) {
+		for (int i = 0; i < numCars; i++) {
 			int pieceIndex = MathUtils.random(margin, track.pieces().size() - 1 - margin);
-			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(100, 350)));
+			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(300, 400)));
 		}
 		
 		// Player cars always spawn on piece 0.
@@ -59,7 +64,10 @@ public class World {
 				trackBuilder.down();
 				break;
 			case 's':
-				trackBuilder.addStraight(STRAIGHT_SIZE);
+				trackBuilder.addStraight(SMALL_STRAIGHT_SIZE);
+				break;
+			case 'S':
+				trackBuilder.addStraight(LARGE_STRAIGHT_SIZE);
 				break;
 			case 'l':
 				trackBuilder.addTurn(MathUtils.PI / 4.0f, SMALL_CURVE_RADIUS);
