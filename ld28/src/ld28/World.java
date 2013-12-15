@@ -26,10 +26,15 @@ public class World {
 	public World() {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
+		
+		// Spawn the computer cars, avoiding piece 0 so that the players don't get screwed.
+		final int margin = 2;
 		for (int i = 0; i < NUM_CARS; i++) {
-			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
+			int pieceIndex = MathUtils.random(margin, track.pieces().size() - 1 - margin);
 			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
 		}
+		
+		// Player cars always spawn on piece 0.
 		cars.add(new PlayerCar(1, Keys.A, track, 0, -1 * 16, 500));
 		cars.add(new PlayerCar(2, Keys.L, track, 0,  1 * 16, 500));
 	}
