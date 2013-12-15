@@ -84,12 +84,23 @@ public class Playing extends State {
 				-guiCam.windowWidth() / 2,
 				-guiCam.windowHeight() / 2 + scoreFont.height(),
 				Color.YELLOW);
+		String lapString = String.format("Lap %d/%d",  world.player1Lap(), world.laps());
+		scoreFont.draw(lapString,
+				-guiCam.windowWidth() / 2,
+				-guiCam.windowHeight() / 2,
+				Color.YELLOW);
 		if (isTwoPlayer) {
 			scoreString = String.format("Player Two: %010d", world.player2Score());
 			Rectangle bounds = scoreFont.bounds(scoreString);
 			scoreFont.draw(scoreString,
 					guiCam.windowWidth() / 2 - bounds.width,
 					-guiCam.windowHeight() / 2 + scoreFont.height(),
+					Color.YELLOW);
+			lapString = String.format("Lap %d/%d",  world.player2Lap(), world.laps());
+			bounds = scoreFont.bounds(lapString);
+			scoreFont.draw(lapString,
+					guiCam.windowWidth() / 2 - bounds.width,
+					-guiCam.windowHeight() / 2,
 					Color.YELLOW);
 		}
 	}

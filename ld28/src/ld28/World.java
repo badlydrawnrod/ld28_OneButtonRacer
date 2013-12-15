@@ -210,6 +210,18 @@ public class World {
 	public long player2Score() {
 		return player2Score;
 	}
+	
+	public int player1Lap() {
+		return player1.lap();
+	}
+	
+	public int player2Lap() {
+		return player2.lap();
+	}
+	
+	public int laps() {
+		return laps[level];
+	}
 }
 
 class TrackBuilder {
