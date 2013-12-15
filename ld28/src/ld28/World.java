@@ -21,12 +21,15 @@ public class World {
 	private static final float LARGE_CURVE_RADIUS = 192;
 //	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
 //	private String oval = "ssLLsLLssLLsLL";
-	private String oval = "ssllLLssssrrrrRR+ssll-";
+	private String oval = "ssllLLssss+rrrrRRss-ll";
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
 	private PlayerCar player2;
 	private Sound overtakingSound;
+	private Sound startSound;
+	private boolean isStartSoundPlaying;
+	private float startingTime;
 
 	public World() {
 		track = generateTrack(oval);
@@ -48,6 +51,10 @@ public class World {
 		cars.add(player2);
 		
 		overtakingSound = Kernel.sounds.get("sounds/overtake");
+		startSound = Kernel.sounds.get("sounds/startrace");
+		isStartSoundPlaying = false;
+		
+		startingTime = Kernel.time.time + 2.0f;
 	}
 	
 	public TrackBuilder track() {
@@ -96,9 +103,17 @@ public class World {
 	}
 
 	public void update() {
-		updateCars();
-		updateCollisions();
-		checkForOvertaking();
+		if (Kernel.time.time < startingTime) {
+			if (!isStartSoundPlaying) {
+				startSound.play();
+				isStartSoundPlaying = true;
+			}
+		}
+		else {
+			updateCars();
+			updateCollisions();
+			checkForOvertaking();
+		}
 	}
 
 	private void updateCars() {
