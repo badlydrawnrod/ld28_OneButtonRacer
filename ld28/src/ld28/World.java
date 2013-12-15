@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ldtk.Kernel;
+import ldtk.Sound;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -18,12 +19,14 @@ public class World {
 	private static final float SMALL_CURVE_RADIUS = 120;
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
-	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
+//	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
 //	private String oval = "ssLLsLLssLLsLL";
-//	private String oval = "sllllsssrrrrrrssll";
-//	private String oval = "sllllssllrrRRsrrsssssRRrrsllll";
+	private String oval = "ssllLLssssrrrrRRssll";
 	private TrackBuilder track;
 	private List<Car> cars;
+	private PlayerCar player1;
+	private PlayerCar player2;
+	private Sound overtakingSound;
 
 	public World() {
 		track = generateTrack(oval);
@@ -39,9 +42,12 @@ public class World {
 			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(300, 400)));
 		}
 		
-		// Player cars always spawn on piece 0.
-		cars.add(new PlayerCar(1, Keys.A, track, 0, -1, 500));
-		cars.add(new PlayerCar(2, Keys.L, track, 0,  1, 500));
+		player1 = new PlayerCar(1, Keys.A, track, 0, -1, 500);
+		cars.add(player1);
+		player2 = new PlayerCar(2, Keys.L, track, 0,  1, 500);
+		cars.add(player2);
+		
+		overtakingSound = Kernel.sounds.get("sounds/overtake");
 	}
 	
 	public TrackBuilder track() {
@@ -53,7 +59,7 @@ public class World {
 	}
 
 	private TrackBuilder generateTrack(String trackDef) {
-		TrackBuilder trackBuilder = new TrackBuilder(0, -200, 0);
+		TrackBuilder trackBuilder = new TrackBuilder(0, 0, 0);
 		for (int i = 0, n = trackDef.length(); i < n; i++) {
 			char c = trackDef.charAt(i);
 			switch (c) {
@@ -85,14 +91,24 @@ public class World {
 				throw new RuntimeException("Unknown track definition: " + c);
 			}
 		}
+		trackBuilder.build();
 		return trackBuilder;
 	}
 
 	public void update() {
+		updateCars();
+		updateCollisions();
+		checkForOvertaking();
+	}
+
+	private void updateCars() {
 		for (int i = cars.size() - 1; i >= 0; i--) {
 			Car car = cars.get(i);
 			car.update();
 		}
+	}
+
+	private void updateCollisions() {
 		for (int i = 0, n = cars.size(); i < n; i++) {
 			Car car = cars.get(i);
 			for (int j = i + 1; j < n; j++) {
@@ -108,9 +124,23 @@ public class World {
 			}
 		}
 	}
+	
+	private void checkForOvertaking() {
+		if (player2 == null) {
+			return;
+		}
+		
+		if (player1.pieceIndex == player2.pieceIndex) {
+			if (Math.abs(player1.distance - player2.distance) < 5.0f) {
+				overtakingSound.play();
+			}
+		}
+	}
 }
 
 class TrackBuilder {
+	public static final float TRACK_WIDTH = 72;
+	public static final int QUADS_PER_PIECE = 6;
 	public static final int NUM_LAYERS = 5;
 	
 	private int layer;
@@ -130,6 +160,42 @@ class TrackBuilder {
 		pieces = new ArrayList<TrackPiece>();
 		piecesByLayer = new int[NUM_LAYERS];
 		layer = 0;
+	}
+	
+	public void build() {
+		Vector2 bl = new Vector2();
+		Vector2 tr = new Vector2();
+		Vector2 cmp = new Vector2();
+		float leftBorder = -TRACK_WIDTH / 2;
+		float rightBorder = TRACK_WIDTH / 2;
+		for (TrackPiece piece : pieces) {
+			float leftLength = piece.length(leftBorder);
+			float rightLength = piece.length(rightBorder);
+			float leftStep = leftLength / QUADS_PER_PIECE;
+			float rightStep = rightLength / QUADS_PER_PIECE;
+			for (int i = 0; i < QUADS_PER_PIECE; i++) {
+				cmp.set(piece.positionAt(leftStep * i, leftBorder));
+				bl.set(Math.min(bl.x, cmp.x), Math.min(bl.y, cmp.y));
+				tr.set(Math.max(tr.x, cmp.x), Math.max(tr.y, cmp.y));
+
+				cmp.set(piece.positionAt(rightStep * i, rightBorder));
+				bl.set(Math.min(bl.x, cmp.x), Math.min(bl.y, cmp.y));
+				tr.set(Math.max(tr.x, cmp.x), Math.max(tr.y, cmp.y));
+
+				cmp.set(piece.positionAt(leftStep * (i + 1), leftBorder));
+				bl.set(Math.min(bl.x, cmp.x), Math.min(bl.y, cmp.y));
+				tr.set(Math.max(tr.x, cmp.x), Math.max(tr.y, cmp.y));
+
+				cmp.set(piece.positionAt(rightStep * (i + 1), rightBorder));
+				bl.set(Math.min(bl.x, cmp.x), Math.min(bl.y, cmp.y));
+				tr.set(Math.max(tr.x, cmp.x), Math.max(tr.y, cmp.y));
+			}
+		}
+		float centreX = MathUtils.floor((bl.x + tr.x) / 2);
+		float centreY = MathUtils.floor((bl.y + tr.y) / 2);
+		for (TrackPiece piece : pieces) {
+			piece.adjust(centreX, centreY);
+		}
 	}
 	
 	public List<TrackPiece> pieces() {
@@ -185,6 +251,11 @@ abstract class TrackPiece {
 
 	public int layer() {
 		return layer;
+	}
+
+	public void adjust(float x, float y) {
+		startPos.sub(x, y);
+		endPos.sub(x, y);
 	}
 	
 	public abstract float length(float lane);
@@ -301,6 +372,12 @@ class TurnPiece extends TrackPiece {
 	@Override
 	public float length(float lane) {
 		return Math.abs(endAngle - startAngle) * (radius + lane);
+	}
+
+	@Override
+	public void adjust(float x, float y) {
+		super.adjust(x, y);
+		centre.sub(x, y);
 	}
 	
 	@Override
@@ -468,11 +545,13 @@ class PlayerCar extends Car {
 	private int key;
 	private boolean isKeyPressed;
 	private int playerNumber;
+	private Sound lapCompleteSound;
 	
 	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		super(track, pieceIndex, currentSlot, speed);
 		this.playerNumber = playerNumber;
 		this.key = key;
+		this.lapCompleteSound = Kernel.sounds.get("sounds/lap_complete");
 	}
 	
 	public void update() {
@@ -488,7 +567,12 @@ class PlayerCar extends Car {
 			distance *= piece.length(newLane) / piece.length(lane);
 			lane = newLane;
 		}
+		int lastPieceIndex = pieceIndex;
 		super.update();
+		if (pieceIndex < lastPieceIndex) {
+			// TODO: create this sound.
+//			lapCompleteSound.play();
+		}
 	}
 
 	public int playerNumber() {
