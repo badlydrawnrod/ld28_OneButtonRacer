@@ -13,18 +13,22 @@ import com.badlogic.gdx.math.Vector2;
 
 public class World {
 
-	private String oval = "ssLLsLLssllll+llllss-LLsLLss";
+	private static final float STRAIGHT_SIZE = 160;
+	private static final float SMALL_CURVE_RADIUS = 120;
+	private static final float LARGE_CURVE_RADIUS = 160;
+	
+	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
 	private TrackBuilder track;
 	private List<Car> cars;
 	
 	public World() {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 20; i++) {
 			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
 			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
 		}
-		cars.add(new PlayerCar(Keys.SPACE, track, 0, 0, 400));
+		cars.add(new PlayerCar(Keys.SPACE, track, 0, 0, 500));
 	}
 	
 	public TrackBuilder track() {
@@ -47,19 +51,19 @@ public class World {
 				trackBuilder.down();
 				break;
 			case 's':
-				trackBuilder.addStraight(100);
+				trackBuilder.addStraight(STRAIGHT_SIZE);
 				break;
 			case 'l':
-				trackBuilder.addTurn(MathUtils.PI / 4.0f, 100);
+				trackBuilder.addTurn(MathUtils.PI / 4.0f, SMALL_CURVE_RADIUS);
 				break;
 			case 'r':
-				trackBuilder.addTurn(-MathUtils.PI / 4.0f, 100);
+				trackBuilder.addTurn(-MathUtils.PI / 4.0f, SMALL_CURVE_RADIUS);
 				break;
 			case 'L':
-				trackBuilder.addTurn(MathUtils.PI / 4.0f, 120);
+				trackBuilder.addTurn(MathUtils.PI / 4.0f, LARGE_CURVE_RADIUS);
 				break;
 			case 'R':
-				trackBuilder.addTurn(-MathUtils.PI / 4.0f, 120);
+				trackBuilder.addTurn(-MathUtils.PI / 4.0f, LARGE_CURVE_RADIUS);
 				break;
 			default:
 				throw new RuntimeException("Unknown track definition: " + c);

@@ -41,7 +41,7 @@ public class WorldRenderer {
 class TrackRenderer {
 
 	private static final int VERTS_PER_QUAD = 20;
-	private static final int QUADS_PER_PIECE = 4;
+	private static final int QUADS_PER_PIECE = 6;
 	private static final float TRACK_WIDTH = 72;
 
 	private int[] quadIndex;

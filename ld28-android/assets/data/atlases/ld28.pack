@@ -6,20 +6,27 @@ repeat: none
 bluecar
   rotate: false
   xy: 1, 1
-  size: 16, 8
-  orig: 16, 8
+  size: 24, 12
+  orig: 24, 12
   offset: 0, 0
   index: -1
 dullcyancar
   rotate: false
-  xy: 19, 1
-  size: 16, 8
-  orig: 16, 8
+  xy: 27, 1
+  size: 24, 12
+  orig: 24, 12
   offset: 0, 0
   index: -1
 redcar
   rotate: false
-  xy: 37, 1
+  xy: 53, 1
+  size: 24, 12
+  orig: 24, 12
+  offset: 0, 0
+  index: -1
+basecar
+  rotate: false
+  xy: 79, 5
   size: 16, 8
   orig: 16, 8
   offset: 0, 0

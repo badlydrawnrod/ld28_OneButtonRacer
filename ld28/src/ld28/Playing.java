@@ -26,8 +26,8 @@ public class Playing extends State {
 	@Override
 	public void enter() {
 		Gdx.input.setCatchBackKey(true);
-		virtualWidth = 800;
-		virtualHeight = 480;
+		virtualWidth = 1280;
+		virtualHeight = 720;
 		guiCam = Kernel.cameras.create("guiCam", virtualWidth, virtualHeight);
 		gameCam = Kernel.cameras.create("gameCam", virtualWidth, virtualHeight);
 		world = new World();
