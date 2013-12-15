@@ -30,7 +30,8 @@ public class World {
 			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
 			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
 		}
-		cars.add(new PlayerCar(Keys.SPACE, track, 0, 0, 500));
+		cars.add(new PlayerCar(1, Keys.A, track, 0, -1 * 16, 500));
+		cars.add(new PlayerCar(2, Keys.L, track, 0,  1 * 16, 500));
 	}
 	
 	public TrackBuilder track() {
@@ -443,9 +444,11 @@ class PlayerCar extends Car {
 	private float currentSlot;
 	private float maxSlot = 2;
 	private boolean isKeyPressed;
+	private int playerNumber;
 	
-	public PlayerCar(int key, TrackBuilder track, int pieceIndex, float lane, float speed) {
+	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, float lane, float speed) {
 		super(track, pieceIndex, lane, speed);
+		this.playerNumber = playerNumber;
 		this.key = key;
 		this.currentSlot = 0;
 	}
@@ -464,5 +467,9 @@ class PlayerCar extends Car {
 			lane = newLane;
 		}
 		super.update();
+	}
+
+	public int playerNumber() {
+		return playerNumber;
 	}
 }

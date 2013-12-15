@@ -3,30 +3,44 @@ ld28.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-bluecar
+dullgreencar
   rotate: false
   xy: 1, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-dullcyancar
+dullmagentacar
   rotate: false
   xy: 27, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-redcar
+bluecar
   rotate: false
   xy: 53, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
+dullcyancar
+  rotate: false
+  xy: 79, 1
+  size: 24, 12
+  orig: 24, 12
+  offset: 0, 0
+  index: -1
+redcar
+  rotate: false
+  xy: 105, 1
+  size: 24, 12
+  orig: 24, 12
+  offset: 0, 0
+  index: -1
 basecar
   rotate: false
-  xy: 79, 5
+  xy: 131, 5
   size: 16, 8
   orig: 16, 8
   offset: 0, 0

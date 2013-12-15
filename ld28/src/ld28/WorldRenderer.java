@@ -125,13 +125,15 @@ class TrackRenderer {
 
 class CarRenderer {
 	private Image carImage;
-	private Image playerImage;
+	private Image redCarImage;
+	private Image blueCarImage;
 	private List<Car> cars;
 
 	public CarRenderer(List<Car> cars) {
 		this.cars = cars;
-		carImage = Kernel.images.get("atlases/ld28/dullcyancar");
-		playerImage = Kernel.images.get("atlases/ld28/redcar");
+		carImage = Kernel.images.get("atlases/ld28/dullmagentacar");
+		redCarImage = Kernel.images.get("atlases/ld28/redcar");
+		blueCarImage = Kernel.images.get("atlases/ld28/bluecar");
 	}
 	
 	public void draw(int layer) {
@@ -139,7 +141,14 @@ class CarRenderer {
 			Car car = cars.get(i);
 			if (car.layer() == layer) { 
 				if (car instanceof PlayerCar) {
-					playerImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+					PlayerCar playerCar = (PlayerCar) car;
+					switch (playerCar.playerNumber()) {
+					case 1:
+						redCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+						break;
+					case 2:
+						blueCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+					}
 				}
 				else {
 					carImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
