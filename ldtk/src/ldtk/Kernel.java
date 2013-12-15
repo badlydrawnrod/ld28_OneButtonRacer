@@ -105,7 +105,7 @@ public class Kernel implements ApplicationListener {
 	    }
 
 		Gdx.gl.glDisable(GL10.GL_SCISSOR_TEST);
-		Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		Gdx.gl.glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		Kernel.batch.begin();
