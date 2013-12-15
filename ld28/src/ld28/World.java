@@ -338,6 +338,7 @@ class TurnPiece extends TrackPiece {
 
 
 class Car {
+	protected static final float MAX_SLOT = 2;
 	private static final float HALF_WIDTH = 12;
 	private static final float HALF_HEIGHT = 6;
 	
@@ -353,6 +354,7 @@ class Car {
 	private Polygon poly;
 	private float accel;
 	protected int currentSlot;
+	protected float direction = 1.0f;
 
 	public Car(TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		this.currentSlot = currentSlot;
@@ -418,7 +420,7 @@ class Car {
 		}
 
 		// Now we know we had a collision.
-		
+
 		int numPieces = track.pieces().size();
 		if (pieceIndex == (other.pieceIndex + 1) % numPieces) {
 			// We're ahead of the other car by one piece, so they shunted us.
@@ -431,8 +433,6 @@ class Car {
 		
 		// We're on the same track piece, so it's all down to distance.
 		return (distance >= other.distance) ? 1: -1;
-		
-		// TODO: what if we're in different lanes? This code assumes same lane.
 	}
 	
 	public void setSpeed(float speed) {
@@ -441,14 +441,23 @@ class Car {
 	
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
+		// Change lanes if we're faster than the other car.
+		if (other.maxSpeed < maxSpeed) {
+			if ((currentSlot == MAX_SLOT && direction > 0) || (currentSlot == -MAX_SLOT && direction < 0)) {
+				direction = -direction;
+			}
+			currentSlot += direction;
+			float newLane = 16 * currentSlot;	// TODO: magic!
+			TrackPiece piece = track.pieces().get(pieceIndex);
+			distance *= piece.length(newLane) / piece.length(lane);
+			lane = newLane;
+		}
 	}
 }
 
 
 class PlayerCar extends Car {
 	private int key;
-	private float direction = 1.0f;
-	private float maxSlot = 2;
 	private boolean isKeyPressed;
 	private int playerNumber;
 	
@@ -463,7 +472,7 @@ class PlayerCar extends Car {
 		isKeyPressed = Gdx.input.isKeyPressed(key);
 		if (wasKeyPressed && !isKeyPressed) {
 			currentSlot += direction;
-			if (currentSlot == maxSlot || currentSlot == -maxSlot) {
+			if (currentSlot == MAX_SLOT || currentSlot == -MAX_SLOT) {
 				direction = -direction;
 			}
 			float newLane = 16 * currentSlot;	// TODO: magic!
@@ -480,5 +489,10 @@ class PlayerCar extends Car {
 
 	public float direction() {
 		return direction;
+	}
+	
+	@Override
+	public void onRanInto(Car other) {
+		speed *= 0.5f;
 	}
 }
