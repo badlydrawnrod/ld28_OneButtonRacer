@@ -1,0 +1,26 @@
+
+ld28.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+bluecar
+  rotate: false
+  xy: 1, 1
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: -1
+dullcyancar
+  rotate: false
+  xy: 19, 1
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: -1
+redcar
+  rotate: false
+  xy: 37, 1
+  size: 16, 8
+  orig: 16, 8
+  offset: 0, 0
+  index: -1

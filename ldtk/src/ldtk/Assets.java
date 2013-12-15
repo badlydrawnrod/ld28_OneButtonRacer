@@ -95,7 +95,7 @@ public class Assets {
 	 * @param path the base path, eg, "level1".
 	 */
 	public void unloadAtlases(String path) {
-		List<String> atlasFilenames = getAssetFilenames(atlasDir(path), ".atlas");
+		List<String> atlasFilenames = getAssetFilenames(atlasDir(path), ".pack");
 		depopulateAtlases(atlasFilenames);
 		unloadAssets(atlasFilenames);
 	}
@@ -174,7 +174,7 @@ public class Assets {
 
 	private List<String> loadAtlasesAsync(String path) {
 		// Load the texture atlases.
-		List<String> atlasFilenames = loadAssets(atlasDir(path), ".atlas", TextureAtlas.class);
+		List<String> atlasFilenames = loadAssets(atlasDir(path), ".pack", TextureAtlas.class);
 		return atlasFilenames;
 	}
 
@@ -225,10 +225,10 @@ public class Assets {
 		for (String filename : atlasFilenames) {
 			TextureAtlas atlas = assetManager.get(filename, TextureAtlas.class);
 
-			// Lop off the "*data/" prefix and the ".atlas" suffix.
+			// Lop off the "*data/" prefix and the ".pack" suffix.
 			int cut = filename.indexOf("data/") + 5;
 			String shortname = filename.substring(cut);
-			shortname = shortname.substring(0, shortname.length() - 6);
+			shortname = shortname.substring(0, shortname.length() - 5);
 
 			Array<AtlasRegion> regions = atlas.getRegions();
 			for (AtlasRegion region : regions) {
@@ -242,10 +242,10 @@ public class Assets {
 		for (String filename : atlasFilenames) {
 			TextureAtlas atlas = assetManager.get(filename, TextureAtlas.class);
 
-			// Lop off the "*data/" prefix and the ".atlas" suffix.
+			// Lop off the "*data/" prefix and the ".pack" suffix.
 			int cut = filename.indexOf("data/") + 5;
 			String shortname = filename.substring(cut);
-			shortname = shortname.substring(0, shortname.length() - 6);
+			shortname = shortname.substring(0, shortname.length() - 5);
 
 			Array<AtlasRegion> regions = atlas.getRegions();
 			for (AtlasRegion region : regions) {

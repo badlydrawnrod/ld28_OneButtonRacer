@@ -20,10 +20,10 @@ public class World {
 	public World() {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
-//		for (int i = 0; i < 10; i++) {
-//			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
-//			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
-//		}
+		for (int i = 0; i < 10; i++) {
+			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
+			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
+		}
 		cars.add(new PlayerCar(Keys.SPACE, track, 0, 0, 400));
 	}
 	

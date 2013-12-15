@@ -82,7 +82,6 @@ class TrackRenderer {
 	}
 
 	private void addQuad(int layer, Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
-//		System.out.println("Adding quad: " + tl + ", " + bl + ", " + br + ", " + tr);
 		float colorBits = Color.WHITE.toFloatBits();
 		float[] verts = vertices[layer];
 		int i = quadIndex[layer] * VERTS_PER_QUAD;
@@ -126,18 +125,25 @@ class TrackRenderer {
 
 class CarRenderer {
 	private Image carImage;
+	private Image playerImage;
 	private List<Car> cars;
 
 	public CarRenderer(List<Car> cars) {
 		this.cars = cars;
-		carImage = Kernel.images.get("atlases/pack/8x8");
+		carImage = Kernel.images.get("atlases/ld28/dullcyancar");
+		playerImage = Kernel.images.get("atlases/ld28/redcar");
 	}
 	
 	public void draw(int layer) {
 		for (int i = 0, n = cars.size(); i < n; i++) {
 			Car car = cars.get(i);
 			if (car.layer() == layer) { 
-				carImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+				if (car instanceof PlayerCar) {
+					playerImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+				}
+				else {
+					carImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+				}
 			}
 		}
 	}
