@@ -19,10 +19,13 @@ public class World {
 	private static final float SMALL_CURVE_RADIUS = 120;
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
-//	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
-	private String oval = "srrllllrrsssllllssssssssllll";
-//	private String oval = "ssLLsLLssLLsLL";
-//	private String oval = "ssllLLssss+rrrrRRss-ll";
+	private static String[] levels = {
+		"sssssLLsLLsssssLLsLL",					// ok
+		"ssLLsLLssllll+llllssLLsLL-ss",			// ok
+		"srrllllrrsssllllssssssssllll",			// ok
+		"ssllLLssss+rrrrRRss-ll",				// ok
+		"ssssLLsLLssllSll+llSllssssLLsLL-ss",	// ok
+	};
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
@@ -34,33 +37,18 @@ public class World {
 	private long player1Score;
 	private long player2Score;
 	private boolean isTwoPlayer;
+	private int level;
+	private boolean isSpacePressed;
 
 	public World(boolean isTwoPlayer) {
 		this.isTwoPlayer = isTwoPlayer;
-		track = generateTrack(oval);
-		cars = new ArrayList<Car>();
-		String trackLenStr = oval.replace("+", "");
-		trackLenStr = trackLenStr.replace("+", "");
-		int numCars = (int)(trackLenStr.length() * 0.8f);
-		
-		// Spawn the computer cars, avoiding piece 0 so that the players don't get screwed.
-		final int margin = 2;
-		for (int i = 0; i < numCars; i++) {
-			int pieceIndex = MathUtils.random(margin, track.pieces().size() - 1 - margin);
-			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(300, 400)));
-		}
-		
-		player1 = new PlayerCar(1, Keys.A, track, 0, -1, 500);
-		cars.add(player1);
-		if (isTwoPlayer) {
-			player2 = new PlayerCar(2, Keys.L, track, 0,  1, 500);
-			cars.add(player2);
-		}
 		overtakingSound = Kernel.sounds.get("sounds/overtake");
 		startSound = Kernel.sounds.get("sounds/startrace");
-		isStartSoundPlaying = false;
-		
-		startingTime = Kernel.time.time + 2.0f;
+		level = -1;
+	}
+
+	public int level() {
+		return level;
 	}
 	
 	public TrackBuilder track() {
@@ -109,6 +97,15 @@ public class World {
 	}
 
 	public void update() {
+		if (level == -1) {
+			startNewLevel();
+		}
+		boolean wasSpacePressed = isSpacePressed;
+		isSpacePressed = Gdx.input.isKeyPressed(Keys.SPACE);
+		if (wasSpacePressed && !isSpacePressed) {
+			startNewLevel();
+		}
+		
 		if (Kernel.time.time < startingTime) {
 			if (!isStartSoundPlaying) {
 				startSound.play();
@@ -123,6 +120,33 @@ public class World {
 		}
 	}
 
+	private void startNewLevel() {
+		level = (level + 1) % levels.length;
+		String trackDef = levels[level];
+		track = generateTrack(trackDef);
+		cars = new ArrayList<Car>();
+		String trackLenStr = trackDef.replace("+", "");
+		trackLenStr = trackLenStr.replace("+", "");
+		int numCars = (int)(trackLenStr.length() * 0.8f);
+		
+		// Spawn the computer cars, avoiding piece 0 so that the players don't get screwed.
+		final int margin = 2;
+		for (int i = 0; i < numCars; i++) {
+			int pieceIndex = MathUtils.random(margin, track.pieces().size() - 1 - margin);
+			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(300, 400)));
+		}
+		
+		player1 = new PlayerCar(1, Keys.A, track, 0, -1, 500);
+		cars.add(player1);
+		if (isTwoPlayer) {
+			player2 = new PlayerCar(2, Keys.L, track, 0,  1, 500);
+			cars.add(player2);
+		}
+		isStartSoundPlaying = false;
+		
+		startingTime = Kernel.time.time + 2.0f;
+	}
+	
 	private void updateCars() {
 		for (int i = cars.size() - 1; i >= 0; i--) {
 			Car car = cars.get(i);

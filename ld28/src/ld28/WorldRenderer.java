@@ -3,7 +3,6 @@ package ld28;
 import java.util.List;
 
 import ldtk.Camera;
-import ldtk.Font;
 import ldtk.Image;
 import ldtk.Kernel;
 
@@ -22,13 +21,13 @@ public class WorldRenderer {
 	public WorldRenderer(World world, Camera gameCam) {
 		this.world = world;
 		this.gameCam = gameCam;
+	}
+
+	public void onLevelStart() {
 		trackRenderer = new TrackRenderer(world.track());
 		carRenderer = new CarRenderer(world.cars());
 	}
-
-	public void setup() {
-	}
-
+	
 	public void draw() {
 		gameCam.activate();
 		for (int i = 0; i < TrackBuilder.NUM_LAYERS; i++) {
@@ -50,8 +49,8 @@ class TrackRenderer {
 	private Texture texture;
 	
 	public TrackRenderer(TrackBuilder track) {
-		generateVerts(track);
 		texture = Kernel.images.get("textures/track").region().getTexture();
+		generateVerts(track);
 	}
 	
 	private void generateVerts(TrackBuilder track) {

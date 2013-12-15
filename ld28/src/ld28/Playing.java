@@ -44,7 +44,6 @@ public class Playing extends State {
 		gameCam = Kernel.cameras.create("gameCam", virtualWidth, virtualHeight);
 		world = new World(isTwoPlayer);
 		worldRenderer = new WorldRenderer(world, gameCam);
-		worldRenderer.setup();
 		soundtrack = Kernel.tunes.get("music/soundtrack");
 		soundtrack.setLooping(true);
 		soundtrack.play();
@@ -69,7 +68,11 @@ public class Playing extends State {
 			app.requestMenu();
 			return;
 		}
+		int oldLevel = world.level();
 		world.update();
+		if (world.level() != oldLevel) {
+			worldRenderer.onLevelStart();
+		}
 	}
 
 	@Override
