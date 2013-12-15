@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
@@ -22,6 +23,7 @@ public class Assets {
 	private Images images;
 	private Fonts fonts;
 	private Sounds sounds;
+	private Tunes tunes;
 
 	/**
 	 * Creates the Assets object, telling it where to store loaded assets.
@@ -33,10 +35,11 @@ public class Assets {
 	 * @param sounds
 	 *            where to store sounds.
 	 */
-	public Assets(Images images, Fonts fonts, Sounds sounds) {
+	public Assets(Images images, Fonts fonts, Sounds sounds, Tunes tunes) {
 		this.images = images;
 		this.fonts = fonts;
 		this.sounds = sounds;
+		this.tunes = tunes;
 		assetManager = new AssetManager();
 	}
 
@@ -60,6 +63,7 @@ public class Assets {
 		loadTextures(path);
 		loadSounds(path);
 		loadFonts(path);
+		loadMusic(path);
 	}
 
 	/**
@@ -73,6 +77,7 @@ public class Assets {
 		unloadTextures(path);
 		unloadSounds(path);
 		unloadFonts(path);
+		unloadMusic(path);
 	}
 
 	/**
@@ -147,6 +152,18 @@ public class Assets {
 		depopulateSounds(soundFilenames);
 		unloadAssets(soundFilenames);
 	}
+	
+	public void loadMusic(String path) {
+		List<String> musicFilenames = loadMusicAsync(path);
+		assetManager.finishLoading();
+		populateMusic(musicFilenames);
+	}
+	
+	public void unloadMusic(String path) {
+		List<String> musicFilenames = getAssetFilenames(musicDir(path), ".ogg");
+		depopulateMusic(musicFilenames);
+		unloadAssets(musicFilenames);
+	}
 
 	/**
 	 * Loads all font assets from the given path. Font assets are expected to be
@@ -200,6 +217,16 @@ public class Assets {
 
 	private String soundDir(String path) {
 		return normalizePath(path) + "sounds";
+	}
+	
+	private List<String> loadMusicAsync(String path) {
+		// Load the music.
+		List<String> musicFilenames = loadAssets(musicDir(path), ".ogg", com.badlogic.gdx.audio.Music.class);
+		return musicFilenames;
+	}
+	
+	private String musicDir(String path) {
+		return normalizePath(path) + "music";
 	}
 
 	private List<String> loadFontsAsync(String path) {
@@ -300,6 +327,29 @@ public class Assets {
 			String soundName = filename.substring(cut);
 			soundName = soundName.substring(0, soundName.length() - 4);
 			sounds.dispose(soundName);
+		}
+	}
+
+	private void populateMusic(List<String> musicFilenames) {
+		// Create tunes from the music.
+		for (String filename : musicFilenames) {
+			Music music = assetManager.get(filename, Music.class);
+
+			// Lop off the "*data/" prefix and the ".ogg" suffix.
+			int cut = filename.indexOf("data/") + 5;
+			String musicName = filename.substring(cut);
+			musicName = musicName.substring(0, musicName.length() - 4);
+			tunes.add(musicName, music);
+		}
+	}
+
+	private void depopulateMusic(List<String> musicFilenames) {
+		for (String filename : musicFilenames) {
+			// Lop off the "*data/" prefix and the ".ogg" suffix.
+			int cut = filename.indexOf("data/") + 5;
+			String musicName = filename.substring(cut);
+			musicName = musicName.substring(0, musicName.length() - 4);
+			tunes.dispose(musicName);
 		}
 	}
 

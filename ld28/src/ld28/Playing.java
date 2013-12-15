@@ -3,6 +3,7 @@ package ld28;
 import ldtk.Camera;
 import ldtk.Kernel;
 import ldtk.State;
+import ldtk.Tune;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -18,6 +19,7 @@ public class Playing extends State {
 	private World world;
 	private boolean isEscapePressed;
 	private boolean isBackPressed;
+	private Tune soundtrack;
 
 	public Playing(App app) {
 		this.app = app;
@@ -33,10 +35,14 @@ public class Playing extends State {
 		world = new World();
 		worldRenderer = new WorldRenderer(world, gameCam);
 		worldRenderer.setup();
+		soundtrack = Kernel.tunes.get("music/soundtrack");
+		soundtrack.setLooping(true);
+		soundtrack.play();
 	}
 
 	@Override
 	public void exit() {
+		soundtrack.stop();
 		Gdx.input.setCatchBackKey(false);
 		gameCam.dispose();
 		guiCam.dispose();

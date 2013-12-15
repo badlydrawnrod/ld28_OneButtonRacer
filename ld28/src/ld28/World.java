@@ -572,7 +572,7 @@ class PlayerCar extends Car {
 		super(track, pieceIndex, currentSlot, speed);
 		this.playerNumber = playerNumber;
 		this.key = key;
-		this.lapCompleteSound = Kernel.sounds.get("sounds/lap_complete");
+		this.lapCompleteSound = Kernel.sounds.get("sounds/lapcomplete");
 		this.crashSound = Kernel.sounds.get("sounds/crash");
 	}
 	
@@ -592,8 +592,7 @@ class PlayerCar extends Car {
 		int lastPieceIndex = pieceIndex;
 		super.update();
 		if (pieceIndex < lastPieceIndex) {
-			// TODO: create this sound.
-//			lapCompleteSound.play();
+			lapCompleteSound.play();
 		}
 	}
 

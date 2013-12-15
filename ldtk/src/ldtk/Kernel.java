@@ -47,9 +47,14 @@ public class Kernel implements ApplicationListener {
 	public static Fonts fonts = new Fonts();
 
 	/**
+	 * The means by which client code obtains a Tune.
+	 */
+	public static Tunes tunes = new Tunes();
+	
+	/**
 	 * The means by which client code can load and unload groups of assets.
 	 */
-	public static Assets assets = new Assets(images, fonts, sounds);
+	public static Assets assets = new Assets(images, fonts, sounds, tunes);
 	
 	private StateSelector stateSelector;
 	private State currentState;
