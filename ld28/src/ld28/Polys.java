@@ -9,6 +9,17 @@ import com.badlogic.gdx.math.Rectangle;
  */
 public class Polys {
 	/**
+	 * Tests if the given polygon is in collision with another. 
+	 * 
+	 * @param polyA the polygon.
+	 * @param polyB the other polygon.
+	 * @return true if the polygons are in collision, otherwise false.
+	 */
+	public static boolean hit(Polygon polyA, Polygon polyB) {
+		return Intersector.overlapConvexPolygons(polyA, polyB);
+	}
+	
+	/**
 	 * Tests if the given polygon is in collision with any of the other polygons.
 	 * 
 	 * @param poly the polygon.

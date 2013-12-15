@@ -8,6 +8,7 @@ import ldtk.Kernel;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
 
@@ -16,6 +17,7 @@ public class World {
 	private static final float STRAIGHT_SIZE = 160;
 	private static final float SMALL_CURVE_RADIUS = 120;
 	private static final float LARGE_CURVE_RADIUS = 160;
+	private static final int NUM_CARS = 30;
 	
 	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
 	private TrackBuilder track;
@@ -24,7 +26,7 @@ public class World {
 	public World() {
 		track = generateTrack(oval);
 		cars = new ArrayList<Car>();
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < NUM_CARS; i++) {
 			int pieceIndex = MathUtils.random(track.pieces().size() - 1);
 			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
 		}
@@ -76,6 +78,15 @@ public class World {
 		for (int i = cars.size() - 1; i >= 0; i--) {
 			Car car = cars.get(i);
 			car.update();
+		}
+		for (int i = 0, n = cars.size(); i < n; i++) {
+			Car car = cars.get(i);
+			for (int j = i + 1; j < n; j++) {
+				Car other = cars.get(j);
+				if (car.hit(other)) {
+					System.out.println("Car " + car + " hit " + other);
+				}
+			}
 		}
 	}
 }
@@ -316,6 +327,9 @@ class TurnPiece extends TrackPiece {
 
 
 class Car {
+	private static final float HALF_WIDTH = 12;
+	private static final float HALF_HEIGHT = 6;
+	
 	protected TrackBuilder track;
 	protected float lane;
 	protected float distance;
@@ -324,6 +338,7 @@ class Car {
 	protected float speed;
 	private int layer;
 	protected int pieceIndex;
+	private Polygon poly;
 
 	public Car(TrackBuilder track, int pieceIndex, float lane, float speed) {
 		this.track = track;
@@ -331,6 +346,13 @@ class Car {
 		this.distance = 0;
 		this.speed = speed;
 		this.pieceIndex = pieceIndex;
+		float[] verts = new float[] {
+			-HALF_WIDTH,  HALF_HEIGHT,
+			-HALF_WIDTH, -HALF_HEIGHT,
+			 HALF_WIDTH, -HALF_HEIGHT,
+			 HALF_WIDTH,  HALF_HEIGHT,
+		};
+		poly = new Polygon(verts); 
 		position = new Vector2();
 		updatePosition();
 	}
@@ -351,6 +373,8 @@ class Car {
 		position.set(piece.positionAt(distance, lane));
 		angle = piece.angleAt(distance, lane);
 		layer = piece.layer();
+		poly.setPosition(position.x, position.y);
+		poly.setRotation(MathUtils.radDeg * angle);
 	}
 	
 	public float x() {
@@ -367,6 +391,10 @@ class Car {
 	
 	public int layer() {
 		return layer;
+	}
+	
+	public boolean hit(Car other) {
+		return Polys.hit(poly, other.poly);
 	}
 }
 
