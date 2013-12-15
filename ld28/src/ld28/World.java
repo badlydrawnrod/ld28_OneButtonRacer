@@ -26,6 +26,7 @@ public class World {
 		"ssllLLssss+rrrrRRss-ll",				// ok
 		"ssssLLsLLssllSll+llSllssssLLsLL-ss",	// ok
 	};
+	private static int[] laps = { 3, 5, 5, 10, 10 };
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
@@ -116,6 +117,7 @@ public class World {
 			updateCars();
 			updateCollisions();
 			checkForOvertaking();
+			checkForWinCondition();
 			updateScores();
 		}
 	}
@@ -182,6 +184,15 @@ public class World {
 			if (Math.abs(player1.distance - player2.distance) < 5.0f) {
 				overtakingSound.play();
 			}
+		}
+	}
+	
+	private void checkForWinCondition() {
+		if (player1.lap() > laps[level]) {
+			startNewLevel();
+		}
+		else if (player2 != null && player2.lap() > laps[level]) {
+			startNewLevel();
 		}
 	}
 	
@@ -613,6 +624,7 @@ class PlayerCar extends Car {
 	private int playerNumber;
 	private Sound lapCompleteSound;
 	private Sound crashSound;
+	private int lap;
 	
 	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		super(track, pieceIndex, currentSlot, speed);
@@ -620,8 +632,13 @@ class PlayerCar extends Car {
 		this.key = key;
 		this.lapCompleteSound = Kernel.sounds.get("sounds/lapcomplete");
 		this.crashSound = Kernel.sounds.get("sounds/crash");
+		lap = 1;
 	}
 	
+	public int lap() {
+		return lap;
+	}
+
 	public void update() {
 		boolean wasKeyPressed = isKeyPressed;
 		isKeyPressed = Gdx.input.isKeyPressed(key);
@@ -638,6 +655,7 @@ class PlayerCar extends Car {
 		int lastPieceIndex = pieceIndex;
 		super.update();
 		if (pieceIndex < lastPieceIndex) {
+			lap++;
 			lapCompleteSound.play();
 		}
 	}
