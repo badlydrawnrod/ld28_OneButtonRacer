@@ -743,6 +743,6 @@ class PlayerCar extends Car {
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
 		crashSound.play();
-		health -= 0.5f;
+		health -= 0.1f;
 	}
 }

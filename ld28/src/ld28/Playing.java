@@ -2,6 +2,7 @@ package ld28;
 
 import ldtk.Camera;
 import ldtk.Font;
+import ldtk.Image;
 import ldtk.Kernel;
 import ldtk.State;
 import ldtk.Tune;
@@ -26,6 +27,7 @@ public class Playing extends State {
 	private Font scoreFont;
 	private boolean isTwoPlayer;
 	private boolean isSpacePressed;
+	private Image greenBarImage;
 
 	public Playing(App app) {
 		this.app = app;
@@ -49,6 +51,7 @@ public class Playing extends State {
 		soundtrack.setLooping(true);
 		soundtrack.play();
 		scoreFont = Kernel.fonts.get("fonts/consolas32");
+		greenBarImage = Kernel.images.get("atlases/ld28/greenbar");
 	}
 
 	@Override
@@ -86,6 +89,8 @@ public class Playing extends State {
 	public void draw() {
 		worldRenderer.draw();
 		guiCam.activate();
+		
+		// Draw player one's info.
 		String scoreString = String.format("Player One: %010d", world.player1Score());
 		scoreFont.draw(scoreString,
 				-guiCam.windowWidth() / 2,
@@ -109,6 +114,12 @@ public class Playing extends State {
 					-guiCam.windowHeight() / 2,
 					Color.YELLOW);
 		}
+		int numBars = (int) ((world.player1Health() * 10) + 0.5f);
+		for (int i = 0; i < numBars; i++) {
+			greenBarImage.draw(-guiCam.windowWidth() / 2 + 4 + 16 * i, -guiCam.windowHeight() / 2 + 80);
+		}
+
+		// Draw player two's info if required.
 		if (isTwoPlayer) {
 			scoreString = String.format("Player Two: %010d", world.player2Score());
 			Rectangle bounds = scoreFont.bounds(scoreString);
@@ -133,7 +144,13 @@ public class Playing extends State {
 						-guiCam.windowHeight() / 2,
 						Color.YELLOW);
 			}
+			numBars = (int) ((world.player2Health() * 10) + 0.5f);
+			for (int i = 0; i < numBars; i++) {
+				greenBarImage.draw(guiCam.windowWidth() / 2 - 4 - 16 * i, -guiCam.windowHeight() / 2 + 80);
+			}
 		}
+		
+		// Draw the race over text if required.
 		if (world.isGameOver()) {
 			String gameOverString = "*** RACE OVER ***";
 			Rectangle bounds = scoreFont.bounds(gameOverString);
@@ -150,6 +167,8 @@ public class Playing extends State {
 						Color.YELLOW);
 			}
 		}
+		
+		// Draw the track name.
 		String nameString = world.levelName();
 		Rectangle bounds = scoreFont.bounds(nameString);
 		scoreFont.draw(nameString,
