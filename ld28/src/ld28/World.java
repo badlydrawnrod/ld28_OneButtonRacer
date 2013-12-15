@@ -20,8 +20,9 @@ public class World {
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
 //	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
+	private String oval = "srrllllrrsssllllssssssssllll";
 //	private String oval = "ssLLsLLssLLsLL";
-	private String oval = "ssllLLssss+rrrrRRss-ll";
+//	private String oval = "ssllLLssss+rrrrRRss-ll";
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
@@ -461,7 +462,7 @@ class Car {
 	public Car(TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		this.currentSlot = currentSlot;
 		this.track = track;
-		this.lane = currentSlot * 16; // TODO: remove Paul Daniels' constant.
+		this.lane = currentSlot * 16;
 		this.distance = 0;
 		this.speed = 0;
 		this.accel = 100.0f;
