@@ -127,6 +127,8 @@ class CarRenderer {
 	private Image carImage;
 	private Image redCarImage;
 	private Image blueCarImage;
+	private Image redArrowImage;
+	private Image blueArrowImage;
 	private List<Car> cars;
 
 	public CarRenderer(List<Car> cars) {
@@ -134,6 +136,8 @@ class CarRenderer {
 		carImage = Kernel.images.get("atlases/ld28/dullmagentacar");
 		redCarImage = Kernel.images.get("atlases/ld28/redcar");
 		blueCarImage = Kernel.images.get("atlases/ld28/bluecar");
+		redArrowImage = Kernel.images.get("atlases/ld28/redarrow");
+		blueArrowImage = Kernel.images.get("atlases/ld28/bluearrow");
 	}
 	
 	public void draw(int layer) {
@@ -142,12 +146,24 @@ class CarRenderer {
 			if (car.layer() == layer) { 
 				if (car instanceof PlayerCar) {
 					PlayerCar playerCar = (PlayerCar) car;
+					float arrowX = playerCar.x();
+					float arrowY = playerCar.y();
+					float arrowAngle = (playerCar.direction() > 0)
+							? car.angle() - MathUtils.PI / 2
+							: car.angle() + MathUtils.PI / 2;
+					float arrowDist = 16 + 4 * MathUtils.sin(Kernel.time.time * 10);
+					arrowX += arrowDist * MathUtils.cos(arrowAngle);
+					arrowY += arrowDist * MathUtils.sin(arrowAngle);
+					arrowAngle *= MathUtils.radDeg;
+					
 					switch (playerCar.playerNumber()) {
 					case 1:
 						redCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+						redArrowImage.draw(arrowX, arrowY, arrowAngle);
 						break;
 					case 2:
 						blueCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+						blueArrowImage.draw(arrowX, arrowY, arrowAngle);
 					}
 				}
 				else {

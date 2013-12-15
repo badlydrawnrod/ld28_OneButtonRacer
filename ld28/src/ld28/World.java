@@ -462,10 +462,10 @@ class PlayerCar extends Car {
 		boolean wasKeyPressed = isKeyPressed;
 		isKeyPressed = Gdx.input.isKeyPressed(key);
 		if (wasKeyPressed && !isKeyPressed) {
-			if ((currentSlot + direction > maxSlot) || (currentSlot + direction < -maxSlot)) {
+			currentSlot += direction;
+			if (currentSlot == maxSlot || currentSlot == -maxSlot) {
 				direction = -direction;
 			}
-			currentSlot += direction;
 			float newLane = 16 * currentSlot;	// TODO: magic!
 			TrackPiece piece = track.pieces().get(pieceIndex);
 			distance *= piece.length(newLane) / piece.length(lane);
@@ -476,5 +476,9 @@ class PlayerCar extends Car {
 
 	public int playerNumber() {
 		return playerNumber;
+	}
+
+	public float direction() {
+		return direction;
 	}
 }

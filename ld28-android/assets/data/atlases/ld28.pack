@@ -5,43 +5,64 @@ filter: Nearest,Nearest
 repeat: none
 dullgreencar
   rotate: false
-  xy: 1, 1
+  xy: 1, 19
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
+basearrow
+  rotate: false
+  xy: 1, 1
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 dullmagentacar
   rotate: false
-  xy: 27, 1
+  xy: 27, 19
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 bluecar
   rotate: false
-  xy: 53, 1
+  xy: 19, 5
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 dullcyancar
   rotate: false
-  xy: 79, 1
+  xy: 53, 19
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 redcar
   rotate: false
-  xy: 105, 1
+  xy: 45, 5
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 basecar
   rotate: false
-  xy: 131, 5
+  xy: 79, 23
   size: 16, 8
   orig: 16, 8
+  offset: 0, 0
+  index: -1
+redarrow
+  rotate: false
+  xy: 97, 23
+  size: 8, 8
+  orig: 8, 8
+  offset: 0, 0
+  index: -1
+bluearrow
+  rotate: false
+  xy: 107, 23
+  size: 8, 8
+  orig: 8, 8
   offset: 0, 0
   index: -1
