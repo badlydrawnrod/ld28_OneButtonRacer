@@ -21,7 +21,7 @@ public class World {
 	private static final float LARGE_CURVE_RADIUS = 192;
 //	private String oval = "ssLLsLLssllll+llllssLLsLL-ss";
 //	private String oval = "ssLLsLLssLLsLL";
-	private String oval = "ssllLLssssrrrrRRssll";
+	private String oval = "ssllLLssssrrrrRR+ssll-";
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
@@ -116,9 +116,11 @@ public class World {
 				switch (car.hit(other)) {
 				case 1:
 					other.onRanInto(car);
+					car.onWasRunInto(other);
 					break;
 				case -1:
 					car.onRanInto(other);
+					car.onWasRunInto(other);
 					break;
 				}
 			}
@@ -524,6 +526,9 @@ class Car {
 		this.speed = speed;
 	}
 	
+	public void onWasRunInto(Car other) {
+	}
+	
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
 		// Change lanes if we're faster than the other car.
@@ -546,12 +551,14 @@ class PlayerCar extends Car {
 	private boolean isKeyPressed;
 	private int playerNumber;
 	private Sound lapCompleteSound;
+	private Sound crashSound;
 	
 	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		super(track, pieceIndex, currentSlot, speed);
 		this.playerNumber = playerNumber;
 		this.key = key;
 		this.lapCompleteSound = Kernel.sounds.get("sounds/lap_complete");
+		this.crashSound = Kernel.sounds.get("sounds/crash");
 	}
 	
 	public void update() {
@@ -584,7 +591,13 @@ class PlayerCar extends Car {
 	}
 	
 	@Override
+	public void onWasRunInto(Car other) {
+		crashSound.play();
+	}
+	
+	@Override
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
+		crashSound.play();
 	}
 }
