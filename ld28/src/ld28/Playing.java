@@ -168,6 +168,24 @@ public class Playing extends State {
 			}
 		}
 		
+		// Draw the game won text if required.
+		if (world.isGameWon()) {
+			String gameWonString = "*** RACE COMPLETED ***";
+			Rectangle bounds = scoreFont.bounds(gameWonString);
+			scoreFont.draw(gameWonString,
+					-bounds.width / 2,
+					-bounds.height / 2,
+					Color.YELLOW);
+			if (world.canQuit()) {
+				gameWonString = "press [SPACE] to continue";
+				bounds = scoreFont.bounds(gameWonString);
+				scoreFont.draw(gameWonString,
+						-bounds.width / 2,
+						-bounds.height / 2 - 2 * bounds.height,
+						Color.YELLOW);
+			}
+		}
+		
 		// Draw the track name.
 		String nameString = world.levelName();
 		Rectangle bounds = scoreFont.bounds(nameString);

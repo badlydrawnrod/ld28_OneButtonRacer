@@ -46,10 +46,10 @@ public class World {
 	private long player2Score;
 	private boolean isTwoPlayer;
 	private int level;
-	private boolean isSpacePressed;
 	private float wonTime;
 	private boolean isWon;
 	private boolean isGameOver;
+	private boolean isGameWon;
 	private float gameOverTime;
 
 	public World(boolean isTwoPlayer) {
@@ -138,8 +138,14 @@ public class World {
 	}
 
 	private void startNewLevel() {
+		if (isGameWon) return;
+		if (level + 1>= levels.length) {
+			isGameWon = true;
+			gameOverTime = Kernel.time.time + 2;
+			return;
+		}
+		level++;
 		isWon = false;
-		level = (level + 1) % levels.length;
 		String trackDef = levels[level];
 		track = generateTrack(trackDef);
 		cars = new ArrayList<Car>();
@@ -265,9 +271,13 @@ public class World {
 	public boolean isGameOver() {
 		return isGameOver;
 	}
+
+	public boolean isGameWon() {
+		return isGameWon;
+	}
 	
 	public boolean canQuit() {
-		return isGameOver && Kernel.time.time > gameOverTime;
+		return (isGameOver || isGameWon) && Kernel.time.time > gameOverTime;
 	}
 }
 

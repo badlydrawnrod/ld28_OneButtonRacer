@@ -3,72 +3,79 @@ ld28.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
+title
+  rotate: false
+  xy: 1, 15
+  size: 778, 110
+  orig: 778, 110
+  offset: 0, 0
+  index: -1
 dullgreencar
   rotate: false
-  xy: 1, 19
+  xy: 1, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-basearrow
-  rotate: false
-  xy: 1, 1
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
 dullmagentacar
   rotate: false
-  xy: 27, 19
+  xy: 781, 113
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 bluecar
   rotate: false
-  xy: 19, 5
+  xy: 27, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 dullcyancar
   rotate: false
-  xy: 53, 19
+  xy: 781, 99
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
 redcar
   rotate: false
-  xy: 45, 5
+  xy: 807, 113
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
+basearrow
+  rotate: false
+  xy: 781, 81
+  size: 16, 16
+  orig: 16, 16
+  offset: 0, 0
+  index: -1
 greenbar
   rotate: false
-  xy: 71, 1
+  xy: 781, 63
   size: 8, 16
   orig: 8, 16
   offset: 0, 0
   index: -1
 basecar
   rotate: false
-  xy: 79, 23
+  xy: 53, 5
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
   index: -1
 redarrow
   rotate: false
-  xy: 97, 23
+  xy: 807, 103
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
 bluearrow
   rotate: false
-  xy: 107, 23
+  xy: 833, 117
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
