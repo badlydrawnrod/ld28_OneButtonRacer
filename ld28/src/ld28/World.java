@@ -84,6 +84,8 @@ public class World {
 			for (int j = i + 1; j < n; j++) {
 				Car other = cars.get(j);
 				if (car.hit(other)) {
+					car.setSpeed(0);
+					other.setSpeed(0);
 					System.out.println("Car " + car + " hit " + other);
 				}
 			}
@@ -336,15 +338,19 @@ class Car {
 	private Vector2 position;
 	private float angle;
 	protected float speed;
+	private float maxSpeed;
 	private int layer;
 	protected int pieceIndex;
 	private Polygon poly;
+	private float accel;
 
 	public Car(TrackBuilder track, int pieceIndex, float lane, float speed) {
 		this.track = track;
 		this.lane = lane;
 		this.distance = 0;
-		this.speed = speed;
+		this.speed = 0;
+		this.accel = 100.0f;
+		this.maxSpeed = speed;
 		this.pieceIndex = pieceIndex;
 		float[] verts = new float[] {
 			-HALF_WIDTH,  HALF_HEIGHT,
@@ -358,6 +364,7 @@ class Car {
 	}
 	
 	public void update() {
+		speed = Math.min(maxSpeed, speed + Kernel.time.delta * accel);
 		distance += Kernel.time.delta * speed;
 		updatePosition();
 	}
@@ -394,7 +401,17 @@ class Car {
 	}
 	
 	public boolean hit(Car other) {
-		return Polys.hit(poly, other.poly);
+		if (!Polys.hit(poly, other.poly)) {
+			return false;
+		}
+		if (Math.abs(pieceIndex - other.pieceIndex) > 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	public void setSpeed(float speed) {
+		this.speed = speed;
 	}
 }
 
