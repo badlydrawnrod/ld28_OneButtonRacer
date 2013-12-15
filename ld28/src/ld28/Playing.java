@@ -25,6 +25,7 @@ public class Playing extends State {
 	private Tune soundtrack;
 	private Font scoreFont;
 	private boolean isTwoPlayer;
+	private boolean isSpacePressed;
 
 	public Playing(App app) {
 		this.app = app;
@@ -68,6 +69,12 @@ public class Playing extends State {
 			app.requestMenu();
 			return;
 		}
+		boolean wasSpacePressed = isSpacePressed;
+		isSpacePressed = Gdx.input.isKeyPressed(Keys.SPACE);
+		if (wasSpacePressed && !isSpacePressed && world.canQuit()) {
+			app.requestMenu();
+			return;
+		}
 		int oldLevel = world.level();
 		world.update();
 		if (world.level() != oldLevel) {
@@ -84,11 +91,24 @@ public class Playing extends State {
 				-guiCam.windowWidth() / 2,
 				-guiCam.windowHeight() / 2 + scoreFont.height(),
 				Color.YELLOW);
-		String lapString = String.format("Lap %d/%d",  world.player1Lap(), world.laps());
-		scoreFont.draw(lapString,
-				-guiCam.windowWidth() / 2,
-				-guiCam.windowHeight() / 2,
-				Color.YELLOW);
+		int lap = world.player1Lap();
+		int laps = world.laps();
+		String lapString;
+		if (lap > laps) {
+			lapString = "*** FINISHED ***";
+		}
+		else if (world.player1Health() < 0) {
+			lapString = "*** CRASHED ***";
+		}
+		else {
+			lapString = String.format("Lap %d/%d",  lap, laps);
+		}
+		if (lapString.charAt(0) != '*' || Kernel.time.time % 0.5f < 0.25f) {
+			scoreFont.draw(lapString,
+					-guiCam.windowWidth() / 2,
+					-guiCam.windowHeight() / 2,
+					Color.YELLOW);
+		}
 		if (isTwoPlayer) {
 			scoreString = String.format("Player Two: %010d", world.player2Score());
 			Rectangle bounds = scoreFont.bounds(scoreString);
@@ -96,12 +116,45 @@ public class Playing extends State {
 					guiCam.windowWidth() / 2 - bounds.width,
 					-guiCam.windowHeight() / 2 + scoreFont.height(),
 					Color.YELLOW);
-			lapString = String.format("Lap %d/%d",  world.player2Lap(), world.laps());
+			lap = world.player2Lap();
+			if (lap > laps) {
+				lapString = "*** FINISHED ***";
+			}
+			else if (world.player2Health() < 0) {
+				lapString = "*** CRASHED ***";
+			}
+			else {
+				lapString = String.format("Lap %d/%d",  lap, laps);
+			}
 			bounds = scoreFont.bounds(lapString);
-			scoreFont.draw(lapString,
-					guiCam.windowWidth() / 2 - bounds.width,
-					-guiCam.windowHeight() / 2,
-					Color.YELLOW);
+			if (lapString.charAt(0) != '*' || Kernel.time.time % 0.5f < 0.25f) {
+				scoreFont.draw(lapString,
+						guiCam.windowWidth() / 2 - bounds.width,
+						-guiCam.windowHeight() / 2,
+						Color.YELLOW);
+			}
 		}
+		if (world.isGameOver()) {
+			String gameOverString = "*** RACE OVER ***";
+			Rectangle bounds = scoreFont.bounds(gameOverString);
+			scoreFont.draw(gameOverString,
+					-bounds.width / 2,
+					-bounds.height / 2,
+					Color.YELLOW);
+			if (world.canQuit()) {
+				gameOverString = "press [SPACE] to continue";
+				bounds = scoreFont.bounds(gameOverString);
+				scoreFont.draw(gameOverString,
+						-bounds.width / 2,
+						-bounds.height / 2 - 2 * bounds.height,
+						Color.YELLOW);
+			}
+		}
+		String nameString = world.levelName();
+		Rectangle bounds = scoreFont.bounds(nameString);
+		scoreFont.draw(nameString,
+				-bounds.width / 2,
+				guiCam.windowHeight() / 2 - bounds.height,
+				Color.YELLOW);
 	}
 }

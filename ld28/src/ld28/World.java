@@ -20,11 +20,18 @@ public class World {
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
 	private static String[] levels = {
-		"sssssLLsLLsssssLLsLL",					// ok
-		"ssLLsLLssllll+llllssLLsLL-ss",			// ok
-		"srrllllrrsssllllssssssssllll",			// ok
-		"ssllLLssss+rrrrRRss-ll",				// ok
-		"ssssLLsLLssllSll+llSllssssLLsLL-ss",	// ok
+		"sssssLLsLLsssssLLsLL",					// 1
+		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
+		"srrllllrrsssllllssssssssllll",			// 3
+		"ssllLLssss+rrrrRRss-ll",				// 4
+		"ssssLLsLLssllSll+llSllssssLLsLL-ss",	// 5
+	};
+	private static String[] levelNames = {
+		"Ludum Racetrack",
+		"Game Loop",
+		"Twisted Track",
+		"Infinite Loop",
+		"Kernel Speedway",
 	};
 	private static int[] laps = { 3, 5, 5, 10, 10 };
 	private TrackBuilder track;
@@ -40,6 +47,10 @@ public class World {
 	private boolean isTwoPlayer;
 	private int level;
 	private boolean isSpacePressed;
+	private float wonTime;
+	private boolean isWon;
+	private boolean isGameOver;
+	private float gameOverTime;
 
 	public World(boolean isTwoPlayer) {
 		this.isTwoPlayer = isTwoPlayer;
@@ -58,6 +69,10 @@ public class World {
 	
 	public List<Car> cars() {
 		return cars;
+	}
+	
+	public String levelName() {
+		return levelNames[level];
 	}
 
 	private TrackBuilder generateTrack(String trackDef) {
@@ -97,32 +112,33 @@ public class World {
 		return trackBuilder;
 	}
 
+	public boolean isStarting() {
+		return Kernel.time.time < startingTime;
+	}
+	
 	public void update() {
-		if (level == -1) {
-			startNewLevel();
-		}
-		boolean wasSpacePressed = isSpacePressed;
-		isSpacePressed = Gdx.input.isKeyPressed(Keys.SPACE);
-		if (wasSpacePressed && !isSpacePressed) {
+		if ((level == -1) || (isWon && Kernel.time.time >= wonTime)) {
 			startNewLevel();
 		}
 		
-		if (Kernel.time.time < startingTime) {
+		if (isStarting()) {
 			if (!isStartSoundPlaying) {
 				startSound.play();
 				isStartSoundPlaying = true;
 			}
 		}
-		else {
+		else if (!isWon && !isGameOver) {
 			updateCars();
 			updateCollisions();
 			checkForOvertaking();
 			checkForWinCondition();
+			checkForLoseCondition();
 			updateScores();
 		}
 	}
 
 	private void startNewLevel() {
+		isWon = false;
 		level = (level + 1) % levels.length;
 		String trackDef = levels[level];
 		track = generateTrack(trackDef);
@@ -186,13 +202,28 @@ public class World {
 			}
 		}
 	}
-	
+
 	private void checkForWinCondition() {
 		if (player1.lap() > laps[level]) {
-			startNewLevel();
+			isWon = true;
+			wonTime = Kernel.time.time + 5;
 		}
 		else if (player2 != null && player2.lap() > laps[level]) {
-			startNewLevel();
+			isWon = true;
+			wonTime = Kernel.time.time + 5;
+		}
+	}
+	
+	private void checkForLoseCondition() {
+		isGameOver = player1.health() < 0 && (player2 == null || player2.health() < 0);
+		if (isGameOver) {
+			gameOverTime = Kernel.time.time + 2; 
+		}
+		if (player1.health() < 0) {
+			cars.remove(player1);
+		}
+		if (player2 != null && player2.health() < 0) {
+			cars.remove(player2);
 		}
 	}
 	
@@ -221,6 +252,22 @@ public class World {
 	
 	public int laps() {
 		return laps[level];
+	}
+
+	public float player1Health() {
+		return player1.health();
+	}
+
+	public float player2Health() {
+		return player2.health();
+	}
+
+	public boolean isGameOver() {
+		return isGameOver;
+	}
+	
+	public boolean canQuit() {
+		return isGameOver && Kernel.time.time > gameOverTime;
 	}
 }
 
@@ -637,6 +684,7 @@ class PlayerCar extends Car {
 	private Sound lapCompleteSound;
 	private Sound crashSound;
 	private int lap;
+	private float health;
 	
 	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		super(track, pieceIndex, currentSlot, speed);
@@ -645,10 +693,15 @@ class PlayerCar extends Car {
 		this.lapCompleteSound = Kernel.sounds.get("sounds/lapcomplete");
 		this.crashSound = Kernel.sounds.get("sounds/crash");
 		lap = 1;
+		health = 1.0f;
 	}
 	
 	public int lap() {
 		return lap;
+	}
+	
+	public float health() {
+		return health;
 	}
 
 	public void update() {
@@ -683,11 +736,13 @@ class PlayerCar extends Car {
 	@Override
 	public void onWasRunInto(Car other) {
 		crashSound.play();
+		health -= 0.05f;
 	}
 	
 	@Override
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
 		crashSound.play();
+		health -= 0.5f;
 	}
 }
