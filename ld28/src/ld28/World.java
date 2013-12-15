@@ -31,12 +31,12 @@ public class World {
 		final int margin = 2;
 		for (int i = 0; i < NUM_CARS; i++) {
 			int pieceIndex = MathUtils.random(margin, track.pieces().size() - 1 - margin);
-			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2) * 16, MathUtils.random(100, 350)));
+			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(100, 350)));
 		}
 		
 		// Player cars always spawn on piece 0.
-		cars.add(new PlayerCar(1, Keys.A, track, 0, -1 * 16, 500));
-		cars.add(new PlayerCar(2, Keys.L, track, 0,  1 * 16, 500));
+		cars.add(new PlayerCar(1, Keys.A, track, 0, -1, 500));
+		cars.add(new PlayerCar(2, Keys.L, track, 0,  1, 500));
 	}
 	
 	public TrackBuilder track() {
@@ -352,10 +352,12 @@ class Car {
 	protected int pieceIndex;
 	private Polygon poly;
 	private float accel;
+	protected int currentSlot;
 
-	public Car(TrackBuilder track, int pieceIndex, float lane, float speed) {
+	public Car(TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
+		this.currentSlot = currentSlot;
 		this.track = track;
-		this.lane = lane;
+		this.lane = currentSlot * 16; // TODO: remove Paul Daniels' constant.
 		this.distance = 0;
 		this.speed = 0;
 		this.accel = 100.0f;
@@ -446,16 +448,14 @@ class Car {
 class PlayerCar extends Car {
 	private int key;
 	private float direction = 1.0f;
-	private float currentSlot;
 	private float maxSlot = 2;
 	private boolean isKeyPressed;
 	private int playerNumber;
 	
-	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, float lane, float speed) {
-		super(track, pieceIndex, lane, speed);
+	public PlayerCar(int playerNumber, int key, TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
+		super(track, pieceIndex, currentSlot, speed);
 		this.playerNumber = playerNumber;
 		this.key = key;
-		this.currentSlot = 0;
 	}
 	
 	public void update() {
