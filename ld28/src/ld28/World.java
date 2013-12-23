@@ -1,6 +1,7 @@
 package ld28;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 
 import ldtk.Kernel;
@@ -154,10 +155,21 @@ public class World {
 		int numCars = (int)(trackLenStr.length() * 0.8f);
 		
 		// Spawn the computer cars, avoiding piece 0 so that the players don't get screwed.
-		final int margin = 2;
+		// Computer cars aren't allowed to spawn on each other.
+		BitSet[] occupied = new BitSet[5];
+		for (int i = 0; i < occupied.length; i++) {
+			occupied[i] = new BitSet();
+		}
+		final int margin = 1;
 		for (int i = 0; i < numCars; i++) {
-			int pieceIndex = MathUtils.random(margin, track.pieces().size() - 1 - margin);
-			cars.add(new Car(track, pieceIndex, MathUtils.random(-2, 2), MathUtils.random(300, 400)));
+			int attempts = 10;
+			int pieceIndex;
+			int lane;
+			do {
+				pieceIndex = MathUtils.random(margin + 1, track.pieces().size() - 1);
+				lane = MathUtils.random(-2, 2);
+			} while (occupied[lane + 2].get(pieceIndex) && attempts-- > 0);
+			cars.add(new Car(track, pieceIndex, lane, MathUtils.random(300, 400)));
 		}
 		
 		player1 = new PlayerCar(1, Keys.A, track, 0, -2, 500);
