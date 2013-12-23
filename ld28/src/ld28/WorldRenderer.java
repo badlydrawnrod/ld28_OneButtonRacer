@@ -143,7 +143,7 @@ class CarRenderer {
 	public void draw(int layer) {
 		for (int i = 0, n = cars.size(); i < n; i++) {
 			Car car = cars.get(i);
-			if (car.layer() == layer) { 
+			if (car.layer() == layer || car.adjoiningLayer() == layer) { 
 				if (car instanceof PlayerCar) {
 					PlayerCar playerCar = (PlayerCar) car;
 					float arrowX = playerCar.x();

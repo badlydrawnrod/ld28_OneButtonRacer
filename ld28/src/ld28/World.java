@@ -21,6 +21,7 @@ public class World {
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
 	private static String[] levels = {
+		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
 		"sssssLLsLLsssssLLsLL",					// 1
 		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
 		"srrllllrrsssllllssssssssllll",			// 3
@@ -34,7 +35,7 @@ public class World {
 		"Infinite Loop",
 		"Kernel Speedway",
 	};
-	private static int[] laps = { 3, 5, 5, 10, 10 };
+	private static int[] laps = { 3000, 3, 5, 5, 10, 10 };
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
@@ -162,7 +163,7 @@ public class World {
 		}
 		final int margin = 1;
 		for (int i = 0; i < numCars; i++) {
-			int attempts = 10;
+			int attempts = 20;
 			int pieceIndex;
 			int lane;
 			do {
@@ -407,6 +408,7 @@ class Car {
 	protected float speed;
 	private float maxSpeed;
 	private int layer;
+	private int adjoiningLayer;
 	protected int pieceIndex;
 	private Polygon poly;
 	private float accel;
@@ -450,8 +452,28 @@ class Car {
 		position.set(piece.positionAt(distance, lane));
 		angle = piece.angleAt(distance, lane);
 		layer = piece.layer();
+		calculateAdjoiningLayer(pieces, piece);
 		poly.setPosition(position.x, position.y);
 		poly.setRotation(MathUtils.radDeg * angle);
+	}
+
+	private void calculateAdjoiningLayer(List<TrackPiece> pieces, TrackPiece piece) {
+		if (distance < HALF_WIDTH) {
+			int n = pieceIndex - 1;
+			if (n < 0) {
+				n = pieces.size() - 1;
+			}
+			TrackPiece adjoiningPiece = pieces.get(n);
+			adjoiningLayer = adjoiningPiece.layer();
+		}
+		else if (distance > piece.length(lane) - HALF_WIDTH) {
+			int n = (pieceIndex + 1) % pieces.size();
+			TrackPiece adjoiningPiece = pieces.get(n);
+			adjoiningLayer = adjoiningPiece.layer();
+		}
+		else {
+			adjoiningLayer = layer;
+		}
 	}
 	
 	public float x() {
@@ -512,6 +534,10 @@ class Car {
 			distance *= piece.length(newLane) / piece.length(lane);
 			lane = newLane;
 		}
+	}
+
+	public int adjoiningLayer() {
+		return adjoiningLayer;
 	}
 }
 
