@@ -172,10 +172,11 @@ public class World {
 			cars.add(new Car(track, pieceIndex, lane, MathUtils.random(300, 400)));
 		}
 		
-		player1 = new PlayerCar(1, Keys.A, track, 0, -2, 500);
+		int mult = MathUtils.randomBoolean() ? 1 : -1;
+		player1 = new PlayerCar(1, Keys.A, track, 0, -1 * mult, 500);
 		cars.add(player1);
 		if (isTwoPlayer) {
-			player2 = new PlayerCar(2, Keys.L, track, 0,  2, 500);
+			player2 = new PlayerCar(2, Keys.L, track, 0,  1 * mult, 500);
 			cars.add(player2);
 		}
 		isStartSoundPlaying = false;
