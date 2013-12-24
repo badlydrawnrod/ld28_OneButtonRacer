@@ -1,6 +1,9 @@
 package ld28;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ldtk.Camera;
 import ldtk.Image;
@@ -9,6 +12,7 @@ import ldtk.Kernel;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
 public class WorldRenderer {
@@ -46,11 +50,16 @@ class TrackRenderer {
 
 	private int[] quadIndex;
 	private float[][] vertices;
+	private Map<TrackPiece, List<Polygon>> polysByPiece;
+	private Map<TrackPiece, List<TrackPiece>> obscuring;
 	private Texture texture;
 	
 	public TrackRenderer(TrackBuilder track) {
 		texture = Kernel.images.get("textures/track").region().getTexture();
+		polysByPiece = new HashMap<TrackPiece, List<Polygon>>();
+		obscuring = new HashMap<TrackPiece, List<TrackPiece>>();
 		generateVerts(track);
+		generateObscuring(track);
 	}
 	
 	private void generateVerts(TrackBuilder track) {
@@ -71,12 +80,42 @@ class TrackRenderer {
 			float rightLength = piece.length(rightBorder);
 			float leftStep = leftLength / QUADS_PER_PIECE;
 			float rightStep = rightLength / QUADS_PER_PIECE;
+			List<Polygon> polys = new ArrayList<Polygon>();
 			for (int i = 0; i < QUADS_PER_PIECE; i++) {
 				tl.set(piece.positionAt(leftStep * i, leftBorder));
 				bl.set(piece.positionAt(rightStep * i, rightBorder));
 				tr.set(piece.positionAt(leftStep * (i + 1), leftBorder));
 				br.set(piece.positionAt(rightStep * (i + 1), rightBorder));
 				addQuad(piece.layer(), tl, bl, br, tr);
+				polys.add(new Polygon(new float[] { tl.x, tl.y, bl.x, bl.y, br.x, br.y, tr.x, tr.y }));
+			}
+			polysByPiece.put(piece, polys);
+		}
+	}
+
+	private void generateObscuring(TrackBuilder track) {
+		List<TrackPiece> pieces = track.pieces();
+		int numPieces = pieces.size();
+		for (int i = 0; i < numPieces; i++) {
+			TrackPiece piece = pieces.get(i);
+			Polygon[] piecePolys = polysByPiece.get(piece).toArray(new Polygon[0]);
+			int layer = piece.layer();
+			for (int j = 0; j < numPieces; j++) {
+				if (i == j) {
+					continue;
+				}
+				TrackPiece other = pieces.get(j);
+				if (layer >= other.layer()) {
+					continue;
+				}
+				Polygon[] otherPolys = polysByPiece.get(other).toArray(new Polygon[0]);
+				if (Polys.hitAny(piecePolys, otherPolys)) {
+					List<TrackPiece> obscuringPieces = obscuring.containsKey(piece)
+							? obscuring.get(piece)
+							: new ArrayList<TrackPiece>();
+					obscuringPieces.add(other);
+					System.out.println(piece + " is obscured by " + other);
+				}
 			}
 		}
 	}
