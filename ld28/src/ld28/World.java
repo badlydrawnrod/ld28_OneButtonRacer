@@ -21,7 +21,6 @@ public class World {
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
 	private static String[] levels = {
-		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
 		"sssssLLsLLsssssLLsLL",					// 1
 		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
 		"srrllllrrsssllllssssssssllll",			// 3
@@ -35,7 +34,7 @@ public class World {
 		"Infinite Loop",
 		"Kernel Speedway",
 	};
-	private static int[] laps = { 3000, 3, 5, 5, 10, 10 };
+	private static int[] laps = { 3, 5, 5, 10, 10 };
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
@@ -492,6 +491,10 @@ class Car {
 		return layer;
 	}
 	
+	public Polygon poly() {
+		return poly;
+	}
+	
 	public int hit(Car other) {
 		// Throw out non-collisions.
 		if (!Polys.hit(poly, other.poly) || (Math.abs(pieceIndex - other.pieceIndex) > 1)) {
@@ -538,6 +541,10 @@ class Car {
 
 	public int adjoiningLayer() {
 		return adjoiningLayer;
+	}
+	
+	public TrackPiece piece() {
+		return track.pieces().get(pieceIndex);
 	}
 }
 
