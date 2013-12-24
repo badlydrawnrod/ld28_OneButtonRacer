@@ -29,7 +29,7 @@ public class WorldRenderer {
 
 	public void onLevelStart() {
 		trackRenderer = new TrackRenderer(world.track());
-		carRenderer = new CarRenderer(world.cars());
+		carRenderer = new CarRenderer(world.cars(), trackRenderer.obscuring(), trackRenderer.polysByPiece());
 	}
 	
 	public void draw() {
@@ -38,6 +38,7 @@ public class WorldRenderer {
 			trackRenderer.draw(i);
 			carRenderer.draw(i);
 		}
+		carRenderer.drawObscured();
 	}
 }
 
@@ -62,6 +63,14 @@ class TrackRenderer {
 		generateObscuring(track);
 	}
 	
+	public Map<TrackPiece, List<TrackPiece>> obscuring() {
+		return obscuring;
+	}
+	
+	public Map<TrackPiece, List<Polygon>> polysByPiece() {
+		return polysByPiece;
+	}
+
 	private void generateVerts(TrackBuilder track) {
 		vertices = new float[TrackBuilder.NUM_LAYERS][];
 		for (int i = 0; i < vertices.length; i++) {
@@ -101,7 +110,8 @@ class TrackRenderer {
 			Polygon[] piecePolys = polysByPiece.get(piece).toArray(new Polygon[0]);
 			int layer = piece.layer();
 			for (int j = 0; j < numPieces; j++) {
-				if (i == j) {
+				// A piece can't obscure itself or its neighbours. 
+				if (Math.abs(i - j) < 2) {
 					continue;
 				}
 				TrackPiece other = pieces.get(j);
@@ -114,7 +124,7 @@ class TrackRenderer {
 							? obscuring.get(piece)
 							: new ArrayList<TrackPiece>();
 					obscuringPieces.add(other);
-					System.out.println(piece + " is obscured by " + other);
+					obscuring.put(piece, obscuringPieces);
 				}
 			}
 		}
@@ -164,15 +174,21 @@ class TrackRenderer {
 
 class CarRenderer {
 	private Image carImage;
+	private Image obscuredCarImage;
 	private Image redCarImage;
 	private Image blueCarImage;
 	private Image redArrowImage;
 	private Image blueArrowImage;
 	private List<Car> cars;
+	private Map<TrackPiece, List<Polygon>> polysByPiece;
+	private Map<TrackPiece, List<TrackPiece>> obscuring;
 
-	public CarRenderer(List<Car> cars) {
+	public CarRenderer(List<Car> cars, Map<TrackPiece, List<TrackPiece>> obscuring, Map<TrackPiece, List<Polygon>> polysByPiece) {
 		this.cars = cars;
+		this.obscuring = obscuring;
+		this.polysByPiece = polysByPiece;
 		carImage = Kernel.images.get("atlases/ld28/dullmagentacar");
+		obscuredCarImage = Kernel.images.get("atlases/ld28/dullcyancar");
 		redCarImage = Kernel.images.get("atlases/ld28/redcar");
 		blueCarImage = Kernel.images.get("atlases/ld28/bluecar");
 		redArrowImage = Kernel.images.get("atlases/ld28/redarrow");
@@ -207,6 +223,23 @@ class CarRenderer {
 				}
 				else {
 					carImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+				}
+			}
+		}
+	}
+	
+	public void drawObscured() {
+		for (int i = 0, n = cars.size(); i < n; i++) {
+			Car car = cars.get(i);
+			TrackPiece piece = car.piece();
+			List<TrackPiece> obscuringPieces = obscuring.get(piece);
+			if (obscuringPieces != null) {
+				for (TrackPiece obscuringPiece : obscuringPieces) {
+					Polygon[] piecePolys = polysByPiece.get(obscuringPiece).toArray(new Polygon[0]);
+					if (Polys.hitAny(car.poly(), piecePolys)) {
+						obscuredCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
+						break;
+					}
 				}
 			}
 		}
