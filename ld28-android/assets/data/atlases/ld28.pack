@@ -38,9 +38,16 @@ dullcyancar
   orig: 24, 12
   offset: 0, 0
   index: -1
-redcar
+transparentcar
   rotate: false
   xy: 807, 113
+  size: 24, 12
+  orig: 24, 12
+  offset: 0, 0
+  index: -1
+redcar
+  rotate: false
+  xy: 53, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
@@ -61,21 +68,21 @@ greenbar
   index: -1
 basecar
   rotate: false
-  xy: 53, 5
+  xy: 807, 103
   size: 16, 8
   orig: 16, 8
   offset: 0, 0
   index: -1
 redarrow
   rotate: false
-  xy: 807, 103
+  xy: 833, 117
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
 bluearrow
   rotate: false
-  xy: 833, 117
+  xy: 79, 5
   size: 8, 8
   orig: 8, 8
   offset: 0, 0

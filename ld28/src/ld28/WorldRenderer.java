@@ -188,7 +188,7 @@ class CarRenderer {
 		this.obscuring = obscuring;
 		this.polysByPiece = polysByPiece;
 		carImage = Kernel.images.get("atlases/ld28/dullmagentacar");
-		obscuredCarImage = Kernel.images.get("atlases/ld28/dullcyancar");
+		obscuredCarImage = Kernel.images.get("atlases/ld28/transparentcar");
 		redCarImage = Kernel.images.get("atlases/ld28/redcar");
 		blueCarImage = Kernel.images.get("atlases/ld28/bluecar");
 		redArrowImage = Kernel.images.get("atlases/ld28/redarrow");
