@@ -16,6 +16,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
  */
 public class Kernel implements ApplicationListener {
 
+	private static final String TAG = "Kernel";
+
 	/**
 	 * A time source available to all LDTK-based programs.
 	 */
@@ -29,32 +31,32 @@ public class Kernel implements ApplicationListener {
 	/**
 	 * The means by which client code obtains a Camera.
 	 */
-	public static Cameras cameras = new Cameras();
+	public static Cameras cameras;;
 
 	/**
 	 * The means by which client code obtains a Sound.
 	 */
-	public static Sounds sounds = new Sounds();
+	public static Sounds sounds;
 
 	/**
 	 * The means by which client code obtains an Image.
 	 */
-	public static Images images = new Images();
+	public static Images images;
 
 	/**
 	 * The means by which client code obtains a Font.
 	 */
-	public static Fonts fonts = new Fonts();
+	public static Fonts fonts;
 
 	/**
 	 * The means by which client code obtains a Tune.
 	 */
-	public static Tunes tunes = new Tunes();
+	public static Tunes tunes;
 	
 	/**
 	 * The means by which client code can load and unload groups of assets.
 	 */
-	public static Assets assets = new Assets(images, fonts, sounds, tunes);
+	public static Assets assets;
 	
 	private StateSelector stateSelector;
 	private State currentState;
@@ -70,7 +72,14 @@ public class Kernel implements ApplicationListener {
 
 	@Override
 	public void create() {
+		Gdx.app.log(TAG, "create()");
 		time = new Time();
+		cameras = new Cameras();
+		sounds = new Sounds();
+		images = new Images();
+		fonts = new Fonts();
+		tunes = new Tunes();
+		assets= new Assets(images, fonts, sounds, tunes);
 		batch = createSpriteBatch();
 		createCamera();
 		assets.loadDefaults();
@@ -124,14 +133,18 @@ public class Kernel implements ApplicationListener {
 
 	@Override
 	public void resize(int width, int height) {
+		Gdx.app.log(TAG, "resize()");
 		cameras.resize(width, height);
 	}
 
 	@Override
 	public void pause() {
+		Gdx.app.log(TAG, "pause()");
 	}
 
 	@Override
 	public void resume() {
+		Gdx.app.log(TAG, "resume()");
+//		assets.loadDefaults();
 	}
 }
