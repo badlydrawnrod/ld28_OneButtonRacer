@@ -145,6 +145,5 @@ public class Kernel implements ApplicationListener {
 	@Override
 	public void resume() {
 		Gdx.app.log(TAG, "resume()");
-//		assets.loadDefaults();
 	}
 }
