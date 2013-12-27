@@ -46,6 +46,7 @@ public class Playing extends State {
 		virtualHeight = 720;
 		guiCam = Kernel.cameras.create("guiCam", virtualWidth, virtualHeight);
 		gameCam = Kernel.cameras.create("gameCam", virtualWidth, virtualHeight);
+		guiCam.setScissored(false);
 		world = new World(isTwoPlayer);
 		worldRenderer = new WorldRenderer(world, gameCam);
 		soundtrack = Kernel.tunes.get("music/soundtrack");
