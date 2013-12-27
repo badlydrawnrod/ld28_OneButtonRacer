@@ -7,6 +7,7 @@ import ldtk.Kernel;
 import ldtk.State;
 import ldtk.Tune;
 
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
@@ -74,7 +75,8 @@ public class Playing extends State {
 		}
 		boolean wasSpacePressed = isSpacePressed;
 		isSpacePressed = Gdx.input.isKeyPressed(Keys.SPACE);
-		if (wasSpacePressed && !isSpacePressed && world.canQuit()) {
+		boolean justTouched = Gdx.input.justTouched();
+		if (((wasSpacePressed && !isSpacePressed) || justTouched) && world.canQuit()) {
 			app.requestMenu();
 			return;
 		}
@@ -159,7 +161,13 @@ public class Playing extends State {
 					-bounds.height / 2,
 					Color.YELLOW);
 			if (world.canQuit()) {
-				gameOverString = "press [SPACE] to continue";
+				boolean isOnAndroid = Gdx.app.getType() == ApplicationType.Android;
+				if (isOnAndroid) {
+					gameOverString = "tap to continue";
+				}
+				else {
+					gameOverString = "press [SPACE] to continue";
+				}
 				bounds = scoreFont.bounds(gameOverString);
 				scoreFont.draw(gameOverString,
 						-bounds.width / 2,
@@ -177,7 +185,13 @@ public class Playing extends State {
 					-bounds.height / 2,
 					Color.YELLOW);
 			if (world.canQuit()) {
-				gameWonString = "press [SPACE] to continue";
+				boolean isOnAndroid = Gdx.app.getType() == ApplicationType.Android;
+				if (isOnAndroid) {
+					gameWonString = "tap to continue";
+				}
+				else {
+					gameWonString = "press [SPACE] to continue";
+				}
 				bounds = scoreFont.bounds(gameWonString);
 				scoreFont.draw(gameWonString,
 						-bounds.width / 2,
