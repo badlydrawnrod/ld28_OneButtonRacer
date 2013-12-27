@@ -10,6 +10,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Menu extends State {
@@ -66,6 +67,10 @@ public class Menu extends State {
 
 	@Override
 	public void draw() {
+		Gdx.gl.glDisable(GL10.GL_SCISSOR_TEST);
+		Gdx.gl.glClearColor(0.0f, 0.2f, 0.0f, 1.0f);
+		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		
 		guiCam.activate();
 		titleImage.draw(0, guiCam.windowHeight() / 4);
 		Rectangle rect = font.bounds(startInstructions);
