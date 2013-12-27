@@ -580,7 +580,8 @@ class PlayerCar extends Car {
 	public void update() {
 		boolean wasKeyPressed = isKeyPressed;
 		isKeyPressed = Gdx.input.isKeyPressed(key);
-		if (wasKeyPressed && !isKeyPressed) {
+		boolean justTouched = Gdx.input.justTouched();
+		if ((wasKeyPressed && !isKeyPressed) || justTouched) {
 			currentSlot += direction;
 			if (currentSlot == MAX_SLOT || currentSlot == -MAX_SLOT) {
 				direction = -direction;

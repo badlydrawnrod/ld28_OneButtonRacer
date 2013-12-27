@@ -17,6 +17,8 @@ import com.badlogic.gdx.utils.Array;
 
 public class Assets {
 
+	private static final String TAG = "Assets";
+	
 	public static final String DEFAULT_PATH = "";
 
 	private AssetManager assetManager;
@@ -49,6 +51,7 @@ public class Assets {
 	 * are in "sounds", not "level1/sounds".
 	 */
 	public void loadDefaults() {
+		Gdx.app.log(TAG, "Loading defaults.");
 		load(DEFAULT_PATH);
 	}
 
@@ -89,6 +92,7 @@ public class Assets {
 	 *            the base path, eg, "level1".
 	 */
 	public void loadAtlases(String path) {
+		Gdx.app.log(TAG, "Loading atlases.");
 		List<String> atlasFilenames = loadAtlasesAsync(path);
 		assetManager.finishLoading();
 		populateAtlases(atlasFilenames);
@@ -113,6 +117,7 @@ public class Assets {
 	 *            the base path, eg, "level1".
 	 */
 	public void loadTextures(String path) {
+		Gdx.app.log(TAG, "Loading textures.");
 		List<String> textureFilenames = loadTexturesAsync(path);
 		assetManager.finishLoading();
 		populateTextures(textureFilenames);
@@ -137,6 +142,7 @@ public class Assets {
 	 *            the base path, eg, "level1".
 	 */
 	public void loadSounds(String path) {
+		Gdx.app.log(TAG, "Loading sounds.");
 		List<String> soundFilenames = loadSoundsAsync(path);
 		assetManager.finishLoading();
 		populateSounds(soundFilenames);
@@ -154,6 +160,7 @@ public class Assets {
 	}
 	
 	public void loadMusic(String path) {
+		Gdx.app.log(TAG, "Loading music.");
 		List<String> musicFilenames = loadMusicAsync(path);
 		assetManager.finishLoading();
 		populateMusic(musicFilenames);
@@ -173,6 +180,7 @@ public class Assets {
 	 *            the base path, eg, "level1".
 	 */
 	public void loadFonts(String path) {
+		Gdx.app.log(TAG, "Loading fonts.");
 		List<String> fontFilenames = loadFontsAsync(path);
 		assetManager.finishLoading();
 		populateFonts(fontFilenames);

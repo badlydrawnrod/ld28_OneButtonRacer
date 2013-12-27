@@ -7,6 +7,7 @@ import ldtk.Kernel;
 import ldtk.State;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Application.ApplicationType;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
@@ -18,10 +19,12 @@ public class Menu extends State {
 	private Font font;
 	private boolean isOnePressed;
 	private boolean isEscapePressed;
-	private String startInstructions = "Press [1] or [2] to select the number of players";
+	private String startInstructions = "Press [1] or [2] to select the number of players and start";
 	private String firstLine = "Player 1 (red car) - press 'A' to change lanes in the direction of the arrow";
 	private String secondLine = "Player 2 (blue car) - press 'L' to change lanes in the direction of the arrow";
 	private String credits = "A Ludum Dare 28 entry by badlydrawnrod";
+	private String startInstructionsAndroid = "Tap to start the game";
+	private String firstLineAndroid = "To play, tap to change lanes in the direction of the arrow";
 	private boolean isTwoPressed;
 	private Image titleImage;
 
@@ -45,7 +48,8 @@ public class Menu extends State {
 	public void update() {
 		boolean wasOnePressed = isOnePressed;
 		isOnePressed = Gdx.input.isKeyPressed(Keys.NUM_1);
-		if ((wasOnePressed && !isOnePressed)) {
+		boolean justTouched = Gdx.input.justTouched();
+		if ((wasOnePressed && !isOnePressed) || justTouched) {
 			app.requestPlaying(false);
 		}
 		boolean wasTwoPressed = isTwoPressed;
@@ -67,12 +71,21 @@ public class Menu extends State {
 		Rectangle rect = font.bounds(startInstructions);
 		float x = -rect.width / 2;
 		float y = -rect.height / 2;
-		font.draw(startInstructions, x, y, Color.WHITE);
-		x -= 200;
-		y -= rect.height * 4;
-		font.draw(firstLine, x, y, Color.WHITE);
-		y -= rect.height * 2;
-		font.draw(secondLine, x, y, Color.WHITE);
+		if (Gdx.app.getType() != ApplicationType.Android) {
+			font.draw(startInstructions, x, y, Color.WHITE);
+			x -= 200;
+			y -= rect.height * 4;
+			font.draw(firstLine, x, y, Color.WHITE);
+			y -= rect.height * 2;
+			font.draw(secondLine, x, y, Color.WHITE);
+		}
+		else {
+			font.draw(startInstructionsAndroid, x, y, Color.WHITE);
+			y -= rect.height * 4;
+			font.draw(firstLineAndroid, x, y, Color.WHITE);
+			y -= rect.height * 2;
+			x -= 200;
+		}
 		x += 250;
 		y -= rect.height * 4;
 		font.draw(credits, x, y, Color.WHITE);
