@@ -10,79 +10,51 @@ title
   orig: 778, 110
   offset: 0, 0
   index: -1
-dullgreencar
+dronecar
   rotate: false
   xy: 1, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-dullmagentacar
+bluecar
   rotate: false
   xy: 781, 113
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-bluecar
+transparentcar
   rotate: false
   xy: 27, 1
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-dullcyancar
+redcar
   rotate: false
   xy: 781, 99
   size: 24, 12
   orig: 24, 12
   offset: 0, 0
   index: -1
-transparentcar
-  rotate: false
-  xy: 807, 113
-  size: 24, 12
-  orig: 24, 12
-  offset: 0, 0
-  index: -1
-redcar
-  rotate: false
-  xy: 53, 1
-  size: 24, 12
-  orig: 24, 12
-  offset: 0, 0
-  index: -1
-basearrow
-  rotate: false
-  xy: 781, 81
-  size: 16, 16
-  orig: 16, 16
-  offset: 0, 0
-  index: -1
 greenbar
   rotate: false
-  xy: 781, 63
+  xy: 807, 109
   size: 8, 16
   orig: 8, 16
   offset: 0, 0
   index: -1
-basecar
-  rotate: false
-  xy: 807, 103
-  size: 16, 8
-  orig: 16, 8
-  offset: 0, 0
-  index: -1
 redarrow
   rotate: false
-  xy: 833, 117
+  xy: 53, 5
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
 bluearrow
   rotate: false
-  xy: 79, 5
+  xy: 781, 89
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
