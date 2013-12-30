@@ -15,6 +15,7 @@ public class LD28Activity extends AndroidApplication {
         
         AndroidApplicationConfiguration cfg = new AndroidApplicationConfiguration();
         cfg.useGL20 = true;
+        cfg.useWakelock = true;
 
 		// To start an Android game just tell the kernel about your app so that it can switch between your game's
 		// states, then start it all through initialize() just as you would any other LibGDX Android game.

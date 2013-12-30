@@ -5,56 +5,56 @@ filter: Nearest,Nearest
 repeat: none
 title
   rotate: false
-  xy: 1, 15
+  xy: 1, 11
   size: 778, 110
   orig: 778, 110
   offset: 0, 0
   index: -1
 dronecar
   rotate: false
-  xy: 1, 1
-  size: 24, 12
-  orig: 24, 12
+  xy: 781, 105
+  size: 32, 16
+  orig: 32, 16
   offset: 0, 0
   index: -1
 bluecar
   rotate: false
-  xy: 781, 113
-  size: 24, 12
-  orig: 24, 12
+  xy: 781, 87
+  size: 32, 16
+  orig: 32, 16
   offset: 0, 0
   index: -1
 transparentcar
   rotate: false
-  xy: 27, 1
-  size: 24, 12
-  orig: 24, 12
+  xy: 815, 105
+  size: 32, 16
+  orig: 32, 16
   offset: 0, 0
   index: -1
 redcar
   rotate: false
-  xy: 781, 99
-  size: 24, 12
-  orig: 24, 12
+  xy: 781, 69
+  size: 32, 16
+  orig: 32, 16
   offset: 0, 0
   index: -1
 greenbar
   rotate: false
-  xy: 807, 109
+  xy: 815, 87
   size: 8, 16
   orig: 8, 16
   offset: 0, 0
   index: -1
 redarrow
   rotate: false
-  xy: 53, 5
+  xy: 1, 1
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
   index: -1
 bluearrow
   rotate: false
-  xy: 781, 89
+  xy: 849, 113
   size: 8, 8
   orig: 8, 8
   offset: 0, 0
