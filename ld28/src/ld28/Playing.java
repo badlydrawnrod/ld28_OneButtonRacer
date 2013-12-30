@@ -102,7 +102,7 @@ public class Playing extends State {
 		String scoreString = String.format("Player One: %010d", world.player1Score());
 		scoreFont.draw(scoreString,
 				-guiCam.windowWidth() / 2,
-				-guiCam.windowHeight() / 2 + scoreFont.height(),
+				guiCam.windowHeight() / 2 - scoreFont.height(),
 				Color.YELLOW);
 		int lap = world.player1Lap();
 		int laps = world.laps();
@@ -119,12 +119,12 @@ public class Playing extends State {
 		if (lapString.charAt(0) != '*' || Kernel.time.time % 0.5f < 0.25f) {
 			scoreFont.draw(lapString,
 					-guiCam.windowWidth() / 2,
-					-guiCam.windowHeight() / 2,
+					guiCam.windowHeight() / 2 - 2 * scoreFont.height(),
 					Color.YELLOW);
 		}
 		int numBars = (int) ((world.player1Health() * 10) + 0.5f);
 		for (int i = 0; i < numBars; i++) {
-			greenBarImage.draw(-guiCam.windowWidth() / 2 + 4 + 16 * i, -guiCam.windowHeight() / 2 + 80);
+			greenBarImage.draw(-guiCam.windowWidth() / 2 + 4 + 16 * i, guiCam.windowHeight() / 2 - 80);
 		}
 
 		// Draw player two's info if required.
@@ -133,7 +133,7 @@ public class Playing extends State {
 			Rectangle bounds = scoreFont.bounds(scoreString);
 			scoreFont.draw(scoreString,
 					guiCam.windowWidth() / 2 - bounds.width,
-					-guiCam.windowHeight() / 2 + scoreFont.height(),
+					guiCam.windowHeight() / 2 - scoreFont.height(),
 					Color.YELLOW);
 			lap = world.player2Lap();
 			if (lap > laps) {
@@ -149,12 +149,12 @@ public class Playing extends State {
 			if (lapString.charAt(0) != '*' || Kernel.time.time % 0.5f < 0.25f) {
 				scoreFont.draw(lapString,
 						guiCam.windowWidth() / 2 - bounds.width,
-						-guiCam.windowHeight() / 2,
+						guiCam.windowHeight() / 2 - 2 * scoreFont.height(),
 						Color.YELLOW);
 			}
 			numBars = (int) ((world.player2Health() * 10) + 0.5f);
 			for (int i = 0; i < numBars; i++) {
-				greenBarImage.draw(guiCam.windowWidth() / 2 - 4 - 16 * i, -guiCam.windowHeight() / 2 + 80);
+				greenBarImage.draw(guiCam.windowWidth() / 2 - 4 - 16 * i, guiCam.windowHeight() / 2 - 80);
 			}
 		}
 		
