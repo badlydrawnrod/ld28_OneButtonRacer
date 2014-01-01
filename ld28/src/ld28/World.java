@@ -21,11 +21,12 @@ public class World {
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
 	private static String[] levels = {
-		"sssssLLsLLsssssLLsLL",					// 1
-		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
-		"srrllllrrsssllllssssssssllll",			// 3
-		"ssllLLssss+rrrrRRss-ll",				// 4
-		"ssssLLsLLssllsll+llsllssssLLsLL-ss",	// 5
+		"sssssLLsLLsssssLLsLL",							// 1
+		"ssLLsLLssllll+llllssLLsLL-ss",					// 2
+		"srrllllrrsssllllssssssssllll",					// 3
+		"ssllLLssss+rrrrRRss-ll",						// 4
+		"ssssLLsLLssllsll+llsllssssLLsLL-ss",			// 5
+		"sssllllsssllrrsrrsssrrssssss+rrrrssssllsll-s",	// 6
 	};
 	private static String[] levelNames = {
 		"Ludum Racetrack",
@@ -33,8 +34,9 @@ public class World {
 		"Twisted Track",
 		"Infinite Loop",
 		"Kernel Speedway",
+		"The Magic Garden",
 	};
-	private static int[] laps = { 3, 5, 5, 10, 10 };
+	private static int[] laps = { 5, 5, 5, 8, 5, 5 };
 	private TrackBuilder track;
 	private List<Car> cars;
 	private PlayerCar player1;
