@@ -25,7 +25,7 @@ public class World {
 		"ssLLsLLssllll+llllssLLsLL-ss",			// 2
 		"srrllllrrsssllllssssssssllll",			// 3
 		"ssllLLssss+rrrrRRss-ll",				// 4
-		"ssssLLsLLssllSll+llSllssssLLsLL-ss",	// 5
+		"ssssLLsLLssllsll+llsllssssLLsLL-ss",	// 5
 	};
 	private static String[] levelNames = {
 		"Ludum Racetrack",
