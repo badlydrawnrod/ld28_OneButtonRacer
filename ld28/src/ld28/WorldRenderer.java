@@ -51,12 +51,15 @@ class TrackRenderer {
 
 	private int[] quadIndex;
 	private float[][] vertices;
+	private float[] startFinishVertices;
 	private Map<TrackPiece, List<Polygon>> polysByPiece;
 	private Map<TrackPiece, List<TrackPiece>> obscuring;
-	private Texture texture;
+	private Texture trackTexture;
+	private Texture startFinishTexture;
 	
 	public TrackRenderer(TrackBuilder track) {
-		texture = Kernel.images.get("textures/track").region().getTexture();
+		trackTexture = Kernel.images.get("textures/track").region().getTexture();
+		startFinishTexture = Kernel.images.get("textures/startfinish").region().getTexture();
 		polysByPiece = new HashMap<TrackPiece, List<Polygon>>();
 		obscuring = new HashMap<TrackPiece, List<TrackPiece>>();
 		generateVerts(track);
@@ -97,6 +100,11 @@ class TrackRenderer {
 				br.set(piece.positionAt(rightStep * (i + 1), rightBorder));
 				addQuad(piece.layer(), tl, bl, br, tr);
 				polys.add(new Polygon(new float[] { tl.x, tl.y, bl.x, bl.y, br.x, br.y, tr.x, tr.y }));
+				if (startFinishVertices == null) {
+					Vector2 tr2 = new Vector2(piece.positionAt(leftStep / 2, leftBorder));
+					Vector2 br2 = new Vector2(piece.positionAt(rightStep / 2, rightBorder));
+					addStartFinish(tl, bl, br2, tr2);
+				}
 			}
 			polysByPiece.put(piece, polys);
 		}
@@ -130,6 +138,42 @@ class TrackRenderer {
 		}
 	}
 
+	private void addStartFinish(Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
+		float colorBits = Color.WHITE.toFloatBits();
+		float[] verts = new float[VERTS_PER_QUAD];
+		int i = 0;
+		
+		// Top left.
+		verts[i + 0] = tl.x;			// x
+		verts[i + 1] = tl.y;			// y
+		verts[i + 2] = colorBits;		// colour
+		verts[i + 3] = 0;				// u
+		verts[i + 4] = 0;				// v
+		
+		// Bottom left.
+		verts[i + 5] = bl.x;			// x
+		verts[i + 6] = bl.y;			// y
+		verts[i + 7] = colorBits;		// colour
+		verts[i + 8] = 0;				// u
+		verts[i + 9] = 1;				// v
+		
+		// Bottom right.
+		verts[i + 10] = br.x ;			// x
+		verts[i + 11] = br.y;			// y
+		verts[i + 12] = colorBits;		// colour
+		verts[i + 13] = 1;				// u
+		verts[i + 14] = 1;				// v
+		
+		// Top right.
+		verts[i + 15] = tr.x;			// x
+		verts[i + 16] = tr.y;			// y
+		verts[i + 17] = colorBits;		// colour
+		verts[i + 18] = 1;				// u
+		verts[i + 19] = 0;				// v
+		
+		startFinishVertices = verts;
+	}
+	
 	private void addQuad(int layer, Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
 		float colorBits = Color.WHITE.toFloatBits();
 		float[] verts = vertices[layer];
@@ -167,7 +211,10 @@ class TrackRenderer {
 	}
 	
 	public void draw(int layer) {
-		Kernel.batch.draw(texture, vertices[layer], 0, vertices[layer].length);
+		Kernel.batch.draw(trackTexture, vertices[layer], 0, vertices[layer].length);
+		if (layer == 0) {
+			Kernel.batch.draw(startFinishTexture, startFinishVertices, 0, startFinishVertices.length);
+		}
 	}
 }
 
