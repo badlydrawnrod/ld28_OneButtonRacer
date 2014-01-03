@@ -130,13 +130,15 @@ public class World {
 				isStartSoundPlaying = true;
 			}
 		}
-		else if (!isWon && !isGameOver) {
+		else if (!isGameOver) {
 			updateCars();
-			updateCollisions();
-			checkForOvertaking();
-			checkForWinCondition();
-			checkForLoseCondition();
-			updateScores();
+			if (!isWon) {
+				updateCollisions();
+				checkForOvertaking();
+				checkForWinCondition();
+				checkForLoseCondition();
+				updateScores();
+			}
 		}
 	}
 
@@ -147,6 +149,10 @@ public class World {
 			gameOverTime = Kernel.time.time + 2;
 			return;
 		}
+
+		// TODO: this should be in the code to tear down the old level.
+		App.broker.unsubscribeAll(PlayerWinEvent.class);
+		
 		level++;
 		isWon = false;
 		String trackDef = levels[level];
@@ -228,10 +234,12 @@ public class World {
 		if (player1.lap() > laps[level]) {
 			isWon = true;
 			wonTime = Kernel.time.time + 5;
+			App.broker.publish(new PlayerWinEvent(1));
 		}
 		else if (player2 != null && player2.lap() > laps[level]) {
 			isWon = true;
 			wonTime = Kernel.time.time + 5;
+			App.broker.publish(new PlayerWinEvent(2));
 		}
 	}
 	
@@ -398,6 +406,8 @@ class TrackBuilder {
 
 
 class Car {
+	private static final String TAG = "Car";
+	
 	protected static final float MAX_SLOT = 2;
 	private static final float HALF_WIDTH = 12;
 	private static final float HALF_HEIGHT = 6;
@@ -416,6 +426,7 @@ class Car {
 	private float accel;
 	protected int currentSlot;
 	protected float direction = 1.0f;
+	protected boolean isRaceOver;
 
 	public Car(TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		this.currentSlot = currentSlot;
@@ -435,10 +446,25 @@ class Car {
 		poly = new Polygon(verts); 
 		position = new Vector2();
 		updatePosition();
+		App.broker.subscribe(PlayerWinEvent.class, new Subscriber() {
+			@Override
+			public void onEvent(Event event) {
+				// Prevent ourselves from receiving this event type again.
+				App.broker.unsubscribe(PlayerWinEvent.class, this);
+				Gdx.app.log(TAG, "PlayerWinEvent");
+				isRaceOver = true;
+				maxSpeed = 200;
+			}
+		});
 	}
 	
 	public void update() {
-		speed = Math.min(maxSpeed, speed + Kernel.time.delta * accel);
+		if (!isRaceOver) {
+			speed = Math.min(maxSpeed, speed + Kernel.time.delta * accel);
+		}
+		else {
+			speed = speed + (maxSpeed - speed) * Kernel.time.delta;
+		}
 		distance += Kernel.time.delta * speed;
 		updatePosition();
 	}
@@ -530,7 +556,7 @@ class Car {
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
 		// Change lanes if we're faster than the other car.
-		if (other.maxSpeed < maxSpeed) {
+		if (!isRaceOver && other.maxSpeed < maxSpeed) {
 			if ((currentSlot == MAX_SLOT && direction > 0) || (currentSlot == -MAX_SLOT && direction < 0)) {
 				direction = -direction;
 			}
@@ -580,18 +606,20 @@ class PlayerCar extends Car {
 	}
 
 	public void update() {
-		boolean wasKeyPressed = isKeyPressed;
-		isKeyPressed = Gdx.input.isKeyPressed(key);
-		boolean justTouched = Gdx.input.justTouched();
-		if ((wasKeyPressed && !isKeyPressed) || justTouched) {
-			currentSlot += direction;
-			if (currentSlot == MAX_SLOT || currentSlot == -MAX_SLOT) {
-				direction = -direction;
+		if (!isRaceOver) {
+			boolean wasKeyPressed = isKeyPressed;
+			isKeyPressed = Gdx.input.isKeyPressed(key);
+			boolean justTouched = Gdx.input.justTouched();
+			if ((wasKeyPressed && !isKeyPressed) || justTouched) {
+				currentSlot += direction;
+				if (currentSlot == MAX_SLOT || currentSlot == -MAX_SLOT) {
+					direction = -direction;
+				}
+				float newLane = 16 * currentSlot;	// TODO: magic!
+				TrackPiece piece = track.pieces().get(pieceIndex);
+				distance *= piece.length(newLane) / piece.length(lane);
+				lane = newLane;
 			}
-			float newLane = 16 * currentSlot;	// TODO: magic!
-			TrackPiece piece = track.pieces().get(pieceIndex);
-			distance *= piece.length(newLane) / piece.length(lane);
-			lane = newLane;
 		}
 		int lastPieceIndex = pieceIndex;
 		super.update();
@@ -612,13 +640,26 @@ class PlayerCar extends Car {
 	@Override
 	public void onWasRunInto(Car other) {
 		crashSound.play();
-		health -= 0.05f;
+		if (!isRaceOver) {
+			health -= 0.05f;
+		}
 	}
 	
 	@Override
 	public void onRanInto(Car other) {
 		speed *= 0.5f;
 		crashSound.play();
-		health -= 0.1f;
+		if (!isRaceOver) {
+			health -= 0.1f;
+		}
+	}
+}
+
+
+class PlayerWinEvent implements Event {
+	public final int winner;
+	
+	public PlayerWinEvent(int player) {
+		this.winner = player;
 	}
 }
