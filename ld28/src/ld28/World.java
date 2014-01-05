@@ -15,11 +15,16 @@ import com.badlogic.gdx.math.Vector2;
 
 
 public class World {
+	
+	enum GameState { START_LEVEL, PLAY_LEVEL, END_LEVEL, WON_GAME, LOST_GAME };
 
 	private static final float SMALL_STRAIGHT_SIZE = 120;
 	private static final float SMALL_CURVE_RADIUS = 120;
 	private static final float LARGE_STRAIGHT_SIZE = 192;
 	private static final float LARGE_CURVE_RADIUS = 192;
+	private static final float END_LEVEL_TIMEOUT = 2.0f;
+	private static final float GAME_OVER_TIMEOUT = 2.0f;
+	
 	private static String[] levels = {
 		"sssssLLsLLsssssLLsLL",							// 1
 		"ssLLsLLssllll+llllssLLsLL-ss",					// 2
@@ -43,25 +48,27 @@ public class World {
 	private PlayerCar player2;
 	private Sound overtakingSound;
 	private Sound startSound;
-	private boolean isStartSoundPlaying;
 	private float startingTime;
 	private long player1Score;
 	private long player2Score;
 	private boolean isTwoPlayer;
 	private int level;
-	private float wonTime;
-	private boolean isWon;
-	private boolean isGameOver;
-	private boolean isEntireGameWon;
-	private float gameOverTime;
+	private GameState gameState;
+	private float stateTime;
 
 	public World(boolean isTwoPlayer) {
 		this.isTwoPlayer = isTwoPlayer;
 		overtakingSound = Kernel.sounds.get("sounds/overtake");
 		startSound = Kernel.sounds.get("sounds/startrace");
 		level = -1;
+		changeState(GameState.START_LEVEL);
 	}
 
+	private void changeState(GameState newState) {
+		gameState = newState;
+		stateTime = Kernel.time.time;
+	}
+	
 	public int level() {
 		return level;
 	}
@@ -115,46 +122,46 @@ public class World {
 		return trackBuilder;
 	}
 
+	public void update() {
+		switch (gameState) {
+		case START_LEVEL:
+			startNewLevel();
+			break;
+		case PLAY_LEVEL:
+			updateCars();
+			updateCollisions();
+			checkForOvertaking();
+			checkForWinCondition();
+			checkForLoseCondition();
+			updateScores();
+			break;
+		case END_LEVEL:
+			updateCars();
+			if (Kernel.time.time >= stateTime + END_LEVEL_TIMEOUT) {
+				tearDownLevel();
+				changeState(GameState.START_LEVEL);
+			}
+			break;
+		case WON_GAME:
+			updateCars();
+			break;
+		case LOST_GAME:
+			updateCars();
+			break;
+		}
+	}
+
 	public boolean isStarting() {
 		return Kernel.time.time < startingTime;
 	}
 	
-	public void update() {
-		if ((level == -1) || (isWon && Kernel.time.time >= wonTime)) {
-			startNewLevel();
-		}
-		
-		if (isStarting()) {
-			if (!isStartSoundPlaying) {
-				startSound.play();
-				isStartSoundPlaying = true;
-			}
-		}
-		else {
-			updateCars();
-			if (!isWon && !isGameOver) {
-				updateCollisions();
-				checkForOvertaking();
-				checkForWinCondition();
-				checkForLoseCondition();
-				updateScores();
-			}
-		}
-	}
-
 	private void startNewLevel() {
-		if (isEntireGameWon) return;
 		if (level + 1 >= levels.length) {
-			isEntireGameWon = true;
-			gameOverTime = Kernel.time.time + 2;
+			changeState(GameState.WON_GAME);
 			return;
 		}
 
-		// TODO: this should be in the code to tear down the old level.
-		App.broker.unsubscribeAll(PlayerWinEvent.class);
-		
 		level++;
-		isWon = false;
 		String trackDef = levels[level];
 		track = generateTrack(trackDef);
 		cars = new ArrayList<Car>();
@@ -187,9 +194,14 @@ public class World {
 			player2 = new PlayerCar(2, Keys.L, track, 0,  1 * mult, 500);
 			cars.add(player2);
 		}
-		isStartSoundPlaying = false;
-		
 		startingTime = Kernel.time.time + 2.0f;
+		startSound.play();
+		changeState(GameState.PLAY_LEVEL);
+	}
+
+	private void tearDownLevel() {
+		App.broker.unsubscribeAll(PlayerWinEvent.class);
+		App.broker.unsubscribeAll(PlayerLoseEvent.class);
 	}
 	
 	private void updateCars() {
@@ -232,21 +244,19 @@ public class World {
 
 	private void checkForWinCondition() {
 		if (player1.lap() > laps[level]) {
-			isWon = true;
-			wonTime = Kernel.time.time + 5;
+			changeState(GameState.END_LEVEL);
 			App.broker.publish(new PlayerWinEvent(1));
 		}
 		else if (player2 != null && player2.lap() > laps[level]) {
-			isWon = true;
-			wonTime = Kernel.time.time + 5;
+			changeState(GameState.END_LEVEL);
 			App.broker.publish(new PlayerWinEvent(2));
 		}
 	}
 	
 	private void checkForLoseCondition() {
-		isGameOver = player1.health() < 0 && (player2 == null || player2.health() < 0);
+		boolean isGameOver = player1.health() < 0 && (player2 == null || player2.health() < 0);
 		if (isGameOver) {
-			gameOverTime = Kernel.time.time + 2; 
+			changeState(GameState.LOST_GAME);
 			App.broker.publish(new PlayerLoseEvent());
 		}
 		if (player1.health() < 0) {
@@ -293,15 +303,16 @@ public class World {
 	}
 
 	public boolean isGameOver() {
-		return isGameOver;
+		return gameState == GameState.LOST_GAME;
 	}
 
 	public boolean isGameWon() {
-		return isEntireGameWon;
+		return gameState == GameState.WON_GAME;
 	}
 	
 	public boolean canQuit() {
-		return (isGameOver || isEntireGameWon) && Kernel.time.time > gameOverTime;
+		return (gameState == GameState.LOST_GAME || gameState == GameState.WON_GAME) &&
+				Kernel.time.time > stateTime + GAME_OVER_TIMEOUT;
 	}
 }
 
@@ -412,6 +423,8 @@ class Car {
 	protected static final float MAX_SLOT = 2;
 	private static final float HALF_WIDTH = 12;
 	private static final float HALF_HEIGHT = 6;
+
+	protected static final float LANE_WIDTH = 16.0f;
 	
 	protected TrackBuilder track;
 	protected float lane;
@@ -432,7 +445,7 @@ class Car {
 	public Car(TrackBuilder track, int pieceIndex, int currentSlot, float speed) {
 		this.currentSlot = currentSlot;
 		this.track = track;
-		this.lane = currentSlot * 16;
+		this.lane = currentSlot * LANE_WIDTH;
 		this.distance = 0;
 		this.speed = 0;
 		this.accel = 100.0f;
@@ -572,7 +585,7 @@ class Car {
 				direction = -direction;
 			}
 			currentSlot += direction;
-			float newLane = 16 * currentSlot;	// TODO: magic!
+			float newLane = LANE_WIDTH * currentSlot;
 			TrackPiece piece = track.pieces().get(pieceIndex);
 			distance *= piece.length(newLane) / piece.length(lane);
 			lane = newLane;
@@ -626,7 +639,7 @@ class PlayerCar extends Car {
 				if (currentSlot == MAX_SLOT || currentSlot == -MAX_SLOT) {
 					direction = -direction;
 				}
-				float newLane = 16 * currentSlot;	// TODO: magic!
+				float newLane = LANE_WIDTH * currentSlot;
 				TrackPiece piece = track.pieces().get(pieceIndex);
 				distance *= piece.length(newLane) / piece.length(lane);
 				lane = newLane;

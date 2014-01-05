@@ -13,7 +13,10 @@ public class Broker {
 		subscriberMap = new HashMap<Class<? extends Event>, List<Subscriber>>();
 	}
 	
-
+	public void clear() {
+		subscriberMap.clear();
+	}
+	
 	public Broker subscribe(Class<? extends Event> klass, Subscriber listener) {
 		List<Subscriber> listeners = subscriberMap.get(klass);
 		if (listeners == null) {
