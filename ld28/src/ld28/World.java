@@ -52,7 +52,7 @@ public class World {
 	private float wonTime;
 	private boolean isWon;
 	private boolean isGameOver;
-	private boolean isGameWon;
+	private boolean isEntireGameWon;
 	private float gameOverTime;
 
 	public World(boolean isTwoPlayer) {
@@ -130,9 +130,9 @@ public class World {
 				isStartSoundPlaying = true;
 			}
 		}
-		else if (!isGameOver) {
+		else {
 			updateCars();
-			if (!isWon) {
+			if (!isWon && !isGameOver) {
 				updateCollisions();
 				checkForOvertaking();
 				checkForWinCondition();
@@ -143,9 +143,9 @@ public class World {
 	}
 
 	private void startNewLevel() {
-		if (isGameWon) return;
-		if (level + 1>= levels.length) {
-			isGameWon = true;
+		if (isEntireGameWon) return;
+		if (level + 1 >= levels.length) {
+			isEntireGameWon = true;
 			gameOverTime = Kernel.time.time + 2;
 			return;
 		}
@@ -247,6 +247,7 @@ public class World {
 		isGameOver = player1.health() < 0 && (player2 == null || player2.health() < 0);
 		if (isGameOver) {
 			gameOverTime = Kernel.time.time + 2; 
+			App.broker.publish(new PlayerLoseEvent());
 		}
 		if (player1.health() < 0) {
 			cars.remove(player1);
@@ -296,11 +297,11 @@ public class World {
 	}
 
 	public boolean isGameWon() {
-		return isGameWon;
+		return isEntireGameWon;
 	}
 	
 	public boolean canQuit() {
-		return (isGameOver || isGameWon) && Kernel.time.time > gameOverTime;
+		return (isGameOver || isEntireGameWon) && Kernel.time.time > gameOverTime;
 	}
 }
 
@@ -452,6 +453,16 @@ class Car {
 				// Prevent ourselves from receiving this event type again.
 				App.broker.unsubscribe(PlayerWinEvent.class, this);
 				Gdx.app.log(TAG, "PlayerWinEvent");
+				isRaceOver = true;
+				maxSpeed = 200;
+			}
+		});
+		App.broker.subscribe(PlayerLoseEvent.class, new Subscriber() {
+			@Override
+			public void onEvent(Event event) {
+				// Prevent ourselves from receiving this event type again.
+				App.broker.unsubscribe(PlayerWinEvent.class, this);
+				Gdx.app.log(TAG, "PlayerLoseEvent");
 				isRaceOver = true;
 				maxSpeed = 200;
 			}
@@ -662,4 +673,8 @@ class PlayerWinEvent implements Event {
 	public PlayerWinEvent(int player) {
 		this.winner = player;
 	}
+}
+
+
+class PlayerLoseEvent implements Event {
 }
