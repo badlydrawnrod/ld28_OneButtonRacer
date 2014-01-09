@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.FloatArray;
 
 public class WorldRenderer {
 
@@ -49,19 +50,24 @@ class TrackRenderer {
 	private static final int QUADS_PER_PIECE = 6;
 	private static final float TRACK_WIDTH = 88;
 
-	private int[] quadIndex;
-	private float[][] vertices;
-	private float[] startFinishVertices;
 	private Map<TrackPiece, List<Polygon>> polysByPiece;
 	private Map<TrackPiece, List<TrackPiece>> obscuring;
-	private Texture trackTexture;
-	private Texture startFinishTexture;
+	private final float[] startFinishVertices;
+	private final FloatArray faVertices;
+	private final int[] faStarts;
+	private final int[] faIndex;
+	private final Texture trackTexture;
+	private final Texture startFinishTexture;
 	
 	public TrackRenderer(TrackBuilder track) {
 		trackTexture = Kernel.images.get("textures/track").region().getTexture();
 		startFinishTexture = Kernel.images.get("textures/startfinish").region().getTexture();
 		polysByPiece = new HashMap<TrackPiece, List<Polygon>>();
 		obscuring = new HashMap<TrackPiece, List<TrackPiece>>();
+		faVertices = new FloatArray(TrackBuilder.MAX_TRACK_PIECES * QUADS_PER_PIECE * VERTS_PER_QUAD);
+		faStarts = new int[TrackBuilder.NUM_LAYERS];
+		faIndex = new int[TrackBuilder.NUM_LAYERS];
+		startFinishVertices = new float[VERTS_PER_QUAD];
 		generateVerts(track);
 		generateObscuring(track);
 	}
@@ -75,11 +81,14 @@ class TrackRenderer {
 	}
 
 	private void generateVerts(TrackBuilder track) {
-		vertices = new float[TrackBuilder.NUM_LAYERS][];
-		for (int i = 0; i < vertices.length; i++) {
-			vertices[i] = new float[track.piecesOnLayer(i) * QUADS_PER_PIECE * VERTS_PER_QUAD];
+		faVertices.clear();
+		int start = 0;
+		for (int i = 0; i < TrackBuilder.NUM_LAYERS; i++) {
+			faStarts[i] = start;
+			faIndex[i] = start;
+			start += track.piecesOnLayer(i) * QUADS_PER_PIECE * VERTS_PER_QUAD;
 		}
-		quadIndex = new int[TrackBuilder.NUM_LAYERS];
+		faVertices.size = start;
 		
 		Vector2 tl = new Vector2();
 		Vector2 bl = new Vector2();
@@ -87,6 +96,7 @@ class TrackRenderer {
 		Vector2 tr = new Vector2();
 		float leftBorder = -TRACK_WIDTH / 2;
 		float rightBorder = TRACK_WIDTH / 2;
+		boolean first = true;
 		for (TrackPiece piece : track.pieces()) {
 			float leftLength = piece.length(leftBorder);
 			float rightLength = piece.length(rightBorder);
@@ -100,7 +110,8 @@ class TrackRenderer {
 				br.set(piece.positionAt(rightStep * (i + 1), rightBorder));
 				addQuad(piece.layer(), tl, bl, br, tr);
 				polys.add(new Polygon(new float[] { tl.x, tl.y, bl.x, bl.y, br.x, br.y, tr.x, tr.y }));
-				if (startFinishVertices == null) {
+				if (first) {
+					first = false;
 					Vector2 tr2 = new Vector2(piece.positionAt(leftStep / 2, leftBorder));
 					Vector2 br2 = new Vector2(piece.positionAt(rightStep / 2, rightBorder));
 					addStartFinish(tl, bl, br2, tr2);
@@ -140,78 +151,75 @@ class TrackRenderer {
 
 	private void addStartFinish(Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
 		float colorBits = Color.WHITE.toFloatBits();
-		float[] verts = new float[VERTS_PER_QUAD];
-		int i = 0;
 		
 		// Top left.
-		verts[i + 0] = tl.x;			// x
-		verts[i + 1] = tl.y;			// y
-		verts[i + 2] = colorBits;		// colour
-		verts[i + 3] = 0;				// u
-		verts[i + 4] = 0;				// v
+		startFinishVertices[0] = tl.x;			// x
+		startFinishVertices[1] = tl.y;			// y
+		startFinishVertices[2] = colorBits;		// colour
+		startFinishVertices[3] = 0;				// u
+		startFinishVertices[4] = 0;				// v
 		
 		// Bottom left.
-		verts[i + 5] = bl.x;			// x
-		verts[i + 6] = bl.y;			// y
-		verts[i + 7] = colorBits;		// colour
-		verts[i + 8] = 0;				// u
-		verts[i + 9] = 1;				// v
+		startFinishVertices[5] = bl.x;			// x
+		startFinishVertices[6] = bl.y;			// y
+		startFinishVertices[7] = colorBits;		// colour
+		startFinishVertices[8] = 0;				// u
+		startFinishVertices[9] = 1;				// v
 		
 		// Bottom right.
-		verts[i + 10] = br.x ;			// x
-		verts[i + 11] = br.y;			// y
-		verts[i + 12] = colorBits;		// colour
-		verts[i + 13] = 1;				// u
-		verts[i + 14] = 1;				// v
+		startFinishVertices[10] = br.x ;		// x
+		startFinishVertices[11] = br.y;			// y
+		startFinishVertices[12] = colorBits;	// colour
+		startFinishVertices[13] = 1;			// u
+		startFinishVertices[14] = 1;			// v
 		
 		// Top right.
-		verts[i + 15] = tr.x;			// x
-		verts[i + 16] = tr.y;			// y
-		verts[i + 17] = colorBits;		// colour
-		verts[i + 18] = 1;				// u
-		verts[i + 19] = 0;				// v
-		
-		startFinishVertices = verts;
+		startFinishVertices[15] = tr.x;			// x
+		startFinishVertices[16] = tr.y;			// y
+		startFinishVertices[17] = colorBits;	// colour
+		startFinishVertices[18] = 1;			// u
+		startFinishVertices[19] = 0;			// v
 	}
 	
 	private void addQuad(int layer, Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
 		float colorBits = Color.WHITE.toFloatBits();
-		float[] verts = vertices[layer];
-		int i = quadIndex[layer] * VERTS_PER_QUAD;
-
+		int index = faIndex[layer];
+		
 		// Top left.
-		verts[i + 0] = tl.x;			// x
-		verts[i + 1] = tl.y;			// y
-		verts[i + 2] = colorBits;		// colour
-		verts[i + 3] = 0;				// u
-		verts[i + 4] = 0;				// v
+		faVertices.set(index + 0, tl.x);			// x
+		faVertices.set(index + 1, tl.y);			// y
+		faVertices.set(index + 2, colorBits);		// colour
+		faVertices.set(index + 3, 0);				// u
+		faVertices.set(index + 4, 0);				// v
 		
 		// Bottom left.
-		verts[i + 5] = bl.x;			// x
-		verts[i + 6] = bl.y;			// y
-		verts[i + 7] = colorBits;		// colour
-		verts[i + 8] = 0;				// u
-		verts[i + 9] = 1;				// v
+		faVertices.set(index + 5, bl.x);			// x
+		faVertices.set(index + 6, bl.y);			// y
+		faVertices.set(index + 7, colorBits);		// colour
+		faVertices.set(index + 8, 0);				// u
+		faVertices.set(index + 9, 1);				// v
 		
 		// Bottom right.
-		verts[i + 10] = br.x;			// x
-		verts[i + 11] = br.y;			// y
-		verts[i + 12] = colorBits;		// colour
-		verts[i + 13] = 1;				// u
-		verts[i + 14] = 1;				// v
+		faVertices.set(index + 10, br.x);			// x
+		faVertices.set(index + 11, br.y);			// y
+		faVertices.set(index + 12, colorBits);		// colour
+		faVertices.set(index + 13, 1);				// u
+		faVertices.set(index + 14, 1);				// v
 		
 		// Top right.
-		verts[i + 15] = tr.x;			// x
-		verts[i + 16] = tr.y;			// y
-		verts[i + 17] = colorBits;		// colour
-		verts[i + 18] = 1;				// u
-		verts[i + 19] = 0;				// v
+		faVertices.set(index + 15, tr.x);			// x
+		faVertices.set(index + 16, tr.y);			// y
+		faVertices.set(index + 17, colorBits);		// colour
+		faVertices.set(index + 18, 1);				// u
+		faVertices.set(index + 19, 0);				// v
 		
-		quadIndex[layer]++;
+		faIndex[layer] += VERTS_PER_QUAD;
 	}
 	
 	public void draw(int layer) {
-		Kernel.batch.draw(trackTexture, vertices[layer], 0, vertices[layer].length);
+		int start = faStarts[layer];
+		int count = faIndex[layer] - start;
+		Kernel.batch.draw(trackTexture, faVertices.items, start, count);
 		if (layer == 0) {
 			Kernel.batch.draw(startFinishTexture, startFinishVertices, 0, startFinishVertices.length);
 		}
