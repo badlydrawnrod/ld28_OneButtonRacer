@@ -14,7 +14,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.FloatArray;
 
 public class WorldRenderer {
 
@@ -55,7 +54,7 @@ class TrackRenderer {
 	private Map<TrackPiece, List<Polygon>> polysByPiece;
 	private Map<TrackPiece, List<TrackPiece>> obscuring;
 	private final float[] startFinishVertices;
-	private final FloatArray vertices;
+	private final float[] vertices;
 	private final int[] layerStarts;
 	private final int[] layerIndexes;
 	private final Texture trackTexture;
@@ -65,7 +64,7 @@ class TrackRenderer {
 	public TrackRenderer() {
 		trackTexture = Kernel.images.get("textures/track").region().getTexture();
 		startFinishTexture = Kernel.images.get("textures/startfinish").region().getTexture();
-		vertices = new FloatArray(TrackBuilder.MAX_TRACK_PIECES * QUADS_PER_PIECE * VERTS_PER_QUAD);
+		vertices = new float[TrackBuilder.MAX_TRACK_PIECES * QUADS_PER_PIECE * VERTS_PER_QUAD];
 		layerStarts = new int[TrackBuilder.NUM_LAYERS];
 		layerIndexes = new int[TrackBuilder.NUM_LAYERS];
 		startFinishVertices = new float[VERTS_PER_QUAD];
@@ -87,14 +86,12 @@ class TrackRenderer {
 	}
 
 	private void generateVerts(TrackBuilder track) {
-		vertices.clear();
 		int start = 0;
 		for (int i = 0; i < TrackBuilder.NUM_LAYERS; i++) {
 			layerStarts[i] = start;
 			layerIndexes[i] = start;
 			start += track.piecesOnLayer(i) * QUADS_PER_PIECE * VERTS_PER_QUAD;
 		}
-		vertices.size = start;
 		
 		Vector2 tl = new Vector2();
 		Vector2 bl = new Vector2();
@@ -189,32 +186,32 @@ class TrackRenderer {
 		int index = layerIndexes[layer];
 		
 		// Top left.
-		vertices.set(index + 0, tl.x);			// x
-		vertices.set(index + 1, tl.y);			// y
-		vertices.set(index + 2, WHITE_BITS);	// colour
-		vertices.set(index + 3, 0);				// u
-		vertices.set(index + 4, 0);				// v
+		vertices[index + 0] = tl.x;			// x
+		vertices[index + 1] = tl.y;			// y
+		vertices[index + 2] = WHITE_BITS;	// colour
+		vertices[index + 3] = 0;				// u
+		vertices[index + 4] = 0;				// v
 		
 		// Bottom left.
-		vertices.set(index + 5, bl.x);			// x
-		vertices.set(index + 6, bl.y);			// y
-		vertices.set(index + 7, WHITE_BITS);	// colour
-		vertices.set(index + 8, 0);				// u
-		vertices.set(index + 9, 1);				// v
+		vertices[index + 5] = bl.x;			// x
+		vertices[index + 6] = bl.y;			// y
+		vertices[index + 7] = WHITE_BITS;	// colour
+		vertices[index + 8] = 0;				// u
+		vertices[index + 9] = 1;				// v
 		
 		// Bottom right.
-		vertices.set(index + 10, br.x);			// x
-		vertices.set(index + 11, br.y);			// y
-		vertices.set(index + 12, WHITE_BITS);	// colour
-		vertices.set(index + 13, 1);			// u
-		vertices.set(index + 14, 1);			// v
+		vertices[index + 10] = br.x;			// x
+		vertices[index + 11] = br.y;			// y
+		vertices[index + 12] = WHITE_BITS;	// colour
+		vertices[index + 13] = 1;			// u
+		vertices[index + 14] = 1;			// v
 		
 		// Top right.
-		vertices.set(index + 15, tr.x);			// x
-		vertices.set(index + 16, tr.y);			// y
-		vertices.set(index + 17, WHITE_BITS);	// colour
-		vertices.set(index + 18, 1);			// u
-		vertices.set(index + 19, 0);			// v
+		vertices[index + 15] = tr.x;			// x
+		vertices[index + 16] = tr.y;			// y
+		vertices[index + 17] = WHITE_BITS;	// colour
+		vertices[index + 18] = 1;			// u
+		vertices[index + 19] = 0;			// v
 		
 		layerIndexes[layer] += VERTS_PER_QUAD;
 	}
@@ -222,7 +219,7 @@ class TrackRenderer {
 	public void draw(int layer) {
 		int start = layerStarts[layer];
 		int count = layerIndexes[layer] - start;
-		Kernel.batch.draw(trackTexture, vertices.items, start, count);
+		Kernel.batch.draw(trackTexture, vertices, start, count);
 		if (layer == 0) {
 			Kernel.batch.draw(startFinishTexture, startFinishVertices, 0, startFinishVertices.length);
 		}
