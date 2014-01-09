@@ -26,10 +26,11 @@ public class WorldRenderer {
 	public WorldRenderer(World world, Camera gameCam) {
 		this.world = world;
 		this.gameCam = gameCam;
+		trackRenderer = new TrackRenderer();
 	}
 
 	public void onLevelStart() {
-		trackRenderer = new TrackRenderer(world.track());
+		trackRenderer.changeTrack(world.track());
 		carRenderer = new CarRenderer(world.cars(), trackRenderer.obscuring(), trackRenderer.polysByPiece());
 	}
 	
@@ -49,26 +50,31 @@ class TrackRenderer {
 	private static final int VERTS_PER_QUAD = 20;
 	private static final int QUADS_PER_PIECE = 6;
 	private static final float TRACK_WIDTH = 88;
+	private static final float WHITE_BITS = Color.WHITE.toFloatBits();
 
 	private Map<TrackPiece, List<Polygon>> polysByPiece;
 	private Map<TrackPiece, List<TrackPiece>> obscuring;
 	private final float[] startFinishVertices;
-	private final FloatArray faVertices;
-	private final int[] faStarts;
-	private final int[] faIndex;
+	private final FloatArray vertices;
+	private final int[] layerStarts;
+	private final int[] layerIndexes;
 	private final Texture trackTexture;
 	private final Texture startFinishTexture;
+;
 	
-	public TrackRenderer(TrackBuilder track) {
+	public TrackRenderer() {
 		trackTexture = Kernel.images.get("textures/track").region().getTexture();
 		startFinishTexture = Kernel.images.get("textures/startfinish").region().getTexture();
-		polysByPiece = new HashMap<TrackPiece, List<Polygon>>();
-		obscuring = new HashMap<TrackPiece, List<TrackPiece>>();
-		faVertices = new FloatArray(TrackBuilder.MAX_TRACK_PIECES * QUADS_PER_PIECE * VERTS_PER_QUAD);
-		faStarts = new int[TrackBuilder.NUM_LAYERS];
-		faIndex = new int[TrackBuilder.NUM_LAYERS];
+		vertices = new FloatArray(TrackBuilder.MAX_TRACK_PIECES * QUADS_PER_PIECE * VERTS_PER_QUAD);
+		layerStarts = new int[TrackBuilder.NUM_LAYERS];
+		layerIndexes = new int[TrackBuilder.NUM_LAYERS];
 		startFinishVertices = new float[VERTS_PER_QUAD];
+	}
+	
+	public void changeTrack(TrackBuilder track) {
+		polysByPiece = new HashMap<TrackPiece, List<Polygon>>();	// FIXME
 		generateVerts(track);
+		obscuring = new HashMap<TrackPiece, List<TrackPiece>>();	// FIXME
 		generateObscuring(track);
 	}
 	
@@ -81,14 +87,14 @@ class TrackRenderer {
 	}
 
 	private void generateVerts(TrackBuilder track) {
-		faVertices.clear();
+		vertices.clear();
 		int start = 0;
 		for (int i = 0; i < TrackBuilder.NUM_LAYERS; i++) {
-			faStarts[i] = start;
-			faIndex[i] = start;
+			layerStarts[i] = start;
+			layerIndexes[i] = start;
 			start += track.piecesOnLayer(i) * QUADS_PER_PIECE * VERTS_PER_QUAD;
 		}
-		faVertices.size = start;
+		vertices.size = start;
 		
 		Vector2 tl = new Vector2();
 		Vector2 bl = new Vector2();
@@ -150,76 +156,73 @@ class TrackRenderer {
 	}
 
 	private void addStartFinish(Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
-		float colorBits = Color.WHITE.toFloatBits();
-		
 		// Top left.
 		startFinishVertices[0] = tl.x;			// x
 		startFinishVertices[1] = tl.y;			// y
-		startFinishVertices[2] = colorBits;		// colour
+		startFinishVertices[2] = WHITE_BITS;	// colour
 		startFinishVertices[3] = 0;				// u
 		startFinishVertices[4] = 0;				// v
 		
 		// Bottom left.
 		startFinishVertices[5] = bl.x;			// x
 		startFinishVertices[6] = bl.y;			// y
-		startFinishVertices[7] = colorBits;		// colour
+		startFinishVertices[7] = WHITE_BITS;	// colour
 		startFinishVertices[8] = 0;				// u
 		startFinishVertices[9] = 1;				// v
 		
 		// Bottom right.
 		startFinishVertices[10] = br.x ;		// x
 		startFinishVertices[11] = br.y;			// y
-		startFinishVertices[12] = colorBits;	// colour
+		startFinishVertices[12] = WHITE_BITS;	// colour
 		startFinishVertices[13] = 1;			// u
 		startFinishVertices[14] = 1;			// v
 		
 		// Top right.
 		startFinishVertices[15] = tr.x;			// x
 		startFinishVertices[16] = tr.y;			// y
-		startFinishVertices[17] = colorBits;	// colour
+		startFinishVertices[17] = WHITE_BITS;	// colour
 		startFinishVertices[18] = 1;			// u
 		startFinishVertices[19] = 0;			// v
 	}
 	
 	private void addQuad(int layer, Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
-		float colorBits = Color.WHITE.toFloatBits();
-		int index = faIndex[layer];
+		int index = layerIndexes[layer];
 		
 		// Top left.
-		faVertices.set(index + 0, tl.x);			// x
-		faVertices.set(index + 1, tl.y);			// y
-		faVertices.set(index + 2, colorBits);		// colour
-		faVertices.set(index + 3, 0);				// u
-		faVertices.set(index + 4, 0);				// v
+		vertices.set(index + 0, tl.x);			// x
+		vertices.set(index + 1, tl.y);			// y
+		vertices.set(index + 2, WHITE_BITS);	// colour
+		vertices.set(index + 3, 0);				// u
+		vertices.set(index + 4, 0);				// v
 		
 		// Bottom left.
-		faVertices.set(index + 5, bl.x);			// x
-		faVertices.set(index + 6, bl.y);			// y
-		faVertices.set(index + 7, colorBits);		// colour
-		faVertices.set(index + 8, 0);				// u
-		faVertices.set(index + 9, 1);				// v
+		vertices.set(index + 5, bl.x);			// x
+		vertices.set(index + 6, bl.y);			// y
+		vertices.set(index + 7, WHITE_BITS);	// colour
+		vertices.set(index + 8, 0);				// u
+		vertices.set(index + 9, 1);				// v
 		
 		// Bottom right.
-		faVertices.set(index + 10, br.x);			// x
-		faVertices.set(index + 11, br.y);			// y
-		faVertices.set(index + 12, colorBits);		// colour
-		faVertices.set(index + 13, 1);				// u
-		faVertices.set(index + 14, 1);				// v
+		vertices.set(index + 10, br.x);			// x
+		vertices.set(index + 11, br.y);			// y
+		vertices.set(index + 12, WHITE_BITS);	// colour
+		vertices.set(index + 13, 1);			// u
+		vertices.set(index + 14, 1);			// v
 		
 		// Top right.
-		faVertices.set(index + 15, tr.x);			// x
-		faVertices.set(index + 16, tr.y);			// y
-		faVertices.set(index + 17, colorBits);		// colour
-		faVertices.set(index + 18, 1);				// u
-		faVertices.set(index + 19, 0);				// v
+		vertices.set(index + 15, tr.x);			// x
+		vertices.set(index + 16, tr.y);			// y
+		vertices.set(index + 17, WHITE_BITS);	// colour
+		vertices.set(index + 18, 1);			// u
+		vertices.set(index + 19, 0);			// v
 		
-		faIndex[layer] += VERTS_PER_QUAD;
+		layerIndexes[layer] += VERTS_PER_QUAD;
 	}
 	
 	public void draw(int layer) {
-		int start = faStarts[layer];
-		int count = faIndex[layer] - start;
-		Kernel.batch.draw(trackTexture, faVertices.items, start, count);
+		int start = layerStarts[layer];
+		int count = layerIndexes[layer] - start;
+		Kernel.batch.draw(trackTexture, vertices.items, start, count);
 		if (layer == 0) {
 			Kernel.batch.draw(startFinishTexture, startFinishVertices, 0, startFinishVertices.length);
 		}
