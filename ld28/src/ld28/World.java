@@ -64,7 +64,7 @@ public class World {
 	private GameState gameState;
 	private float stateTime;
 
-	public World(boolean isTwoPlayer) {
+	public void init(boolean isTwoPlayer) {
 		this.isTwoPlayer = isTwoPlayer;
 		overtakingSound = Kernel.sounds.get("sounds/overtake");
 		startSound = Kernel.sounds.get("sounds/startrace");
