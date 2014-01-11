@@ -63,6 +63,7 @@ public class World {
 	private int level;
 	private GameState gameState;
 	private float stateTime;
+	private TrackBuilder trackBuilder = new TrackBuilder();
 
 	public void init(boolean isTwoPlayer) {
 		this.isTwoPlayer = isTwoPlayer;
@@ -94,7 +95,7 @@ public class World {
 	}
 
 	private TrackBuilder generateTrack(String trackDef) {
-		TrackBuilder trackBuilder = new TrackBuilder(0, 0, 0);
+		trackBuilder.init(0, 0, 0);
 		for (int i = 0, n = trackDef.length(); i < n; i++) {
 			char c = trackDef.charAt(i);
 			switch (c) {

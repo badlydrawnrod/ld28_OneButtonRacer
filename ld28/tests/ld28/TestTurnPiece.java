@@ -16,7 +16,8 @@ public class TestTurnPiece {
 		float startAngle = 0.0f;
 		float endAngle = MathUtils.PI / 2;
 		float radius = 100;
-		TurnPiece turnPiece = new TurnPiece(0, pos, startAngle, endAngle, radius);
+		TurnPiece turnPiece = new TurnPiece();
+		turnPiece.set(0, pos, startAngle, endAngle, radius);
 		assertEquals(radius * MathUtils.PI / 2, turnPiece.length(0), EPSILON);
 		
 		assertEquals(MathUtils.PI / 8, turnPiece.angleAt(turnPiece.length(0) / 4, 0), EPSILON);
@@ -35,7 +36,8 @@ public class TestTurnPiece {
 		float startAngle = 0.0f;
 		float endAngle = -MathUtils.PI / 2;
 		float radius = 100;
-		TurnPiece turnPiece = new TurnPiece(0, pos, startAngle, endAngle, radius);
+		TurnPiece turnPiece = new TurnPiece();
+		turnPiece.set(0, pos, startAngle, endAngle, radius);
 		assertEquals(radius * MathUtils.PI / 2, turnPiece.length(0), EPSILON);
 		
 		assertEquals(-MathUtils.PI / 8, turnPiece.angleAt(turnPiece.length(0) / 4, 0), EPSILON);
@@ -54,7 +56,8 @@ public class TestTurnPiece {
 		float startAngle = 0.0f;
 		float endAngle = MathUtils.PI / 2;
 		float radius = 100;
-		TurnPiece turnPiece = new TurnPiece(0, pos, startAngle, endAngle, radius);
+		TurnPiece turnPiece = new TurnPiece();
+		turnPiece.set(0, pos, startAngle, endAngle, radius);
 		float lane = -10.0f;
 		assertEquals((radius + lane) * MathUtils.PI / 2, turnPiece.length(lane), EPSILON);
 		
@@ -74,7 +77,8 @@ public class TestTurnPiece {
 		float startAngle = 0.0f;
 		float endAngle = -MathUtils.PI / 2;
 		float radius = 100;
-		TurnPiece turnPiece = new TurnPiece(0, pos, startAngle, endAngle, radius);
+		TurnPiece turnPiece = new TurnPiece();
+		turnPiece.set(0, pos, startAngle, endAngle, radius);
 		float lane = -10.0f;
 		assertEquals((radius - lane) * MathUtils.PI / 2, turnPiece.length(lane), EPSILON);
 		
@@ -94,7 +98,8 @@ public class TestTurnPiece {
 		float startAngle = 0.0f;
 		float endAngle = MathUtils.PI / 2;
 		float radius = 100;
-		TurnPiece turnPiece = new TurnPiece(0, pos, startAngle, endAngle, radius);
+		TurnPiece turnPiece = new TurnPiece();
+		turnPiece.set(0, pos, startAngle, endAngle, radius);
 		float lane = 10.0f;
 		assertEquals((radius + lane) * MathUtils.PI / 2, turnPiece.length(lane), EPSILON);
 		
@@ -114,7 +119,8 @@ public class TestTurnPiece {
 		float startAngle = 0.0f;
 		float endAngle = -MathUtils.PI / 2;
 		float radius = 100;
-		TurnPiece turnPiece = new TurnPiece(0, pos, startAngle, endAngle, radius);
+		TurnPiece turnPiece = new TurnPiece();
+		turnPiece.set(0, pos, startAngle, endAngle, radius);
 		float lane = 10.0f;
 		assertEquals((radius - lane) * MathUtils.PI / 2, turnPiece.length(lane), EPSILON);
 		
