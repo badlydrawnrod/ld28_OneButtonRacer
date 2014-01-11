@@ -10,6 +10,7 @@ class TrackBuilder {
 	public static final float TRACK_WIDTH = 72;
 	public static final int QUADS_PER_PIECE = 6;
 	public static final int NUM_LAYERS = 5;
+	public static final int MAX_TRACK_PIECES = 100;
 	
 	private int layer;
 	private Vector2 pos;

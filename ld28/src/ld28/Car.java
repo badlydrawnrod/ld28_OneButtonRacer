@@ -180,7 +180,7 @@ class Car {
 			}
 			currentSlot += direction;
 			float newLane = LANE_WIDTH * currentSlot;
-			TrackPiece piece = track.pieces().get(pieceIndex);
+			TrackPiece piece = piece();
 			distance *= piece.length(newLane) / piece.length(lane);
 			lane = newLane;
 		}
