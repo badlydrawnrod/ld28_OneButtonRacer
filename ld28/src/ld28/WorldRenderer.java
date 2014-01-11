@@ -1,9 +1,6 @@
 package ld28;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import ldtk.Camera;
 import ldtk.Image;
@@ -12,7 +9,6 @@ import ldtk.Kernel;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 
 public class WorldRenderer {
@@ -30,7 +26,7 @@ public class WorldRenderer {
 
 	public void onLevelStart() {
 		trackRenderer.changeTrack(world.track());
-		carRenderer = new CarRenderer(world.cars(), trackRenderer.obscuring(), trackRenderer.polysByPiece());
+		carRenderer = new CarRenderer(world.cars());
 	}
 	
 	public void draw() {
@@ -51,15 +47,13 @@ class TrackRenderer {
 	private static final float TRACK_WIDTH = 88;
 	private static final float WHITE_BITS = Color.WHITE.toFloatBits();
 
-	private Map<TrackPiece, List<Polygon>> polysByPiece;
-	private Map<TrackPiece, List<TrackPiece>> obscuring;
 	private final float[] startFinishVertices;
 	private final float[] vertices;
 	private final int[] layerStarts;
 	private final int[] layerIndexes;
 	private final Texture trackTexture;
 	private final Texture startFinishTexture;
-;
+
 	
 	public TrackRenderer() {
 		trackTexture = Kernel.images.get("textures/track").region().getTexture();
@@ -69,22 +63,11 @@ class TrackRenderer {
 		layerIndexes = new int[TrackBuilder.NUM_LAYERS];
 		startFinishVertices = new float[VERTS_PER_QUAD];
 	}
-	
-	public void changeTrack(TrackBuilder track) {
-		polysByPiece = new HashMap<TrackPiece, List<Polygon>>();	// FIXME
-		generateVerts(track);
-		obscuring = new HashMap<TrackPiece, List<TrackPiece>>();	// FIXME
-		generateObscuring(track);
-	}
-	
-	public Map<TrackPiece, List<TrackPiece>> obscuring() {
-		return obscuring;
-	}
-	
-	public Map<TrackPiece, List<Polygon>> polysByPiece() {
-		return polysByPiece;
-	}
 
+	public void changeTrack(TrackBuilder track) {
+		generateVerts(track);
+	}
+	
 	private void generateVerts(TrackBuilder track) {
 		int start = 0;
 		for (int i = 0; i < TrackBuilder.NUM_LAYERS; i++) {
@@ -105,14 +88,12 @@ class TrackRenderer {
 			float rightLength = piece.length(rightBorder);
 			float leftStep = leftLength / QUADS_PER_PIECE;
 			float rightStep = rightLength / QUADS_PER_PIECE;
-			List<Polygon> polys = new ArrayList<Polygon>();
 			for (int i = 0; i < QUADS_PER_PIECE; i++) {
 				tl.set(piece.positionAt(leftStep * i, leftBorder));
 				bl.set(piece.positionAt(rightStep * i, rightBorder));
 				tr.set(piece.positionAt(leftStep * (i + 1), leftBorder));
 				br.set(piece.positionAt(rightStep * (i + 1), rightBorder));
 				addQuad(piece.layer(), tl, bl, br, tr);
-				polys.add(new Polygon(new float[] { tl.x, tl.y, bl.x, bl.y, br.x, br.y, tr.x, tr.y }));
 				if (first) {
 					first = false;
 					Vector2 tr2 = new Vector2(piece.positionAt(leftStep / 2, leftBorder));
@@ -120,38 +101,9 @@ class TrackRenderer {
 					addStartFinish(tl, bl, br2, tr2);
 				}
 			}
-			polysByPiece.put(piece, polys);
 		}
 	}
-
-	private void generateObscuring(TrackBuilder track) {
-		List<TrackPiece> pieces = track.pieces();
-		int numPieces = pieces.size();
-		for (int i = 0; i < numPieces; i++) {
-			TrackPiece piece = pieces.get(i);
-			Polygon[] piecePolys = polysByPiece.get(piece).toArray(new Polygon[0]);
-			int layer = piece.layer();
-			for (int j = 0; j < numPieces; j++) {
-				// A piece can't obscure itself or its neighbours. 
-				if (Math.abs(i - j) < 2) {
-					continue;
-				}
-				TrackPiece other = pieces.get(j);
-				if (layer >= other.layer()) {
-					continue;
-				}
-				Polygon[] otherPolys = polysByPiece.get(other).toArray(new Polygon[0]);
-				if (Polys.hitAny(piecePolys, otherPolys)) {
-					List<TrackPiece> obscuringPieces = obscuring.containsKey(piece)
-							? obscuring.get(piece)
-							: new ArrayList<TrackPiece>();
-					obscuringPieces.add(other);
-					obscuring.put(piece, obscuringPieces);
-				}
-			}
-		}
-	}
-
+	
 	private void addStartFinish(Vector2 tl, Vector2 bl, Vector2 br, Vector2 tr) {
 		// Top left.
 		startFinishVertices[0] = tl.x;			// x
@@ -189,26 +141,26 @@ class TrackRenderer {
 		vertices[index + 0] = tl.x;			// x
 		vertices[index + 1] = tl.y;			// y
 		vertices[index + 2] = WHITE_BITS;	// colour
-		vertices[index + 3] = 0;				// u
-		vertices[index + 4] = 0;				// v
+		vertices[index + 3] = 0;			// u
+		vertices[index + 4] = 0;			// v
 		
 		// Bottom left.
 		vertices[index + 5] = bl.x;			// x
 		vertices[index + 6] = bl.y;			// y
 		vertices[index + 7] = WHITE_BITS;	// colour
-		vertices[index + 8] = 0;				// u
-		vertices[index + 9] = 1;				// v
+		vertices[index + 8] = 0;			// u
+		vertices[index + 9] = 1;			// v
 		
 		// Bottom right.
-		vertices[index + 10] = br.x;			// x
-		vertices[index + 11] = br.y;			// y
+		vertices[index + 10] = br.x;		// x
+		vertices[index + 11] = br.y;		// y
 		vertices[index + 12] = WHITE_BITS;	// colour
 		vertices[index + 13] = 1;			// u
 		vertices[index + 14] = 1;			// v
 		
 		// Top right.
-		vertices[index + 15] = tr.x;			// x
-		vertices[index + 16] = tr.y;			// y
+		vertices[index + 15] = tr.x;		// x
+		vertices[index + 16] = tr.y;		// y
 		vertices[index + 17] = WHITE_BITS;	// colour
 		vertices[index + 18] = 1;			// u
 		vertices[index + 19] = 0;			// v
@@ -235,13 +187,9 @@ class CarRenderer {
 	private Image redArrowImage;
 	private Image blueArrowImage;
 	private List<Car> cars;
-	private Map<TrackPiece, List<Polygon>> polysByPiece;
-	private Map<TrackPiece, List<TrackPiece>> obscuring;
 
-	public CarRenderer(List<Car> cars, Map<TrackPiece, List<TrackPiece>> obscuring, Map<TrackPiece, List<Polygon>> polysByPiece) {
+	public CarRenderer(List<Car> cars) {
 		this.cars = cars;
-		this.obscuring = obscuring;
-		this.polysByPiece = polysByPiece;
 		carImage = Kernel.images.get("atlases/ld28/dronecar");
 		obscuredCarImage = Kernel.images.get("atlases/ld28/transparentcar");
 		redCarImage = Kernel.images.get("atlases/ld28/redcar");
@@ -286,17 +234,7 @@ class CarRenderer {
 	public void drawObscured() {
 		for (int i = 0, n = cars.size(); i < n; i++) {
 			Car car = cars.get(i);
-			TrackPiece piece = car.piece();
-			List<TrackPiece> obscuringPieces = obscuring.get(piece);
-			if (obscuringPieces != null) {
-				for (TrackPiece obscuringPiece : obscuringPieces) {
-					Polygon[] piecePolys = polysByPiece.get(obscuringPiece).toArray(new Polygon[0]);
-					if (Polys.hitAny(car.poly(), piecePolys)) {
-						obscuredCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
-						break;
-					}
-				}
-			}
+			obscuredCarImage.draw(car.x(), car.y(), MathUtils.radDeg * car.angle());
 		}
 	}
 }
