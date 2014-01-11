@@ -7,14 +7,14 @@ class StraightPiece extends TrackPiece {
 	private float angle;
 	private float length;
 	
-	public StraightPiece(int layer, Vector2 pos, float angle, float length) {
-		super(layer);
-		this.startPos = new Vector2(pos);
+	public void set(int layer, Vector2 pos, float angle, float length) {
+		setLayer(layer);
+		setStartPos(pos.x, pos.y);
 		this.angle = angle;
 		this.length = length;
 		float endX = startPos.x + MathUtils.cos(angle) * length;
 		float endY = startPos.y + MathUtils.sin(angle) * length;
-		this.endPos = new Vector2(endX, endY);
+		setEndPos(endX, endY);
 	}
 
 	@Override

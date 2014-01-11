@@ -4,12 +4,20 @@ import com.badlogic.gdx.math.Vector2;
 
 abstract class TrackPiece {
 	
-	protected Vector2 startPos;
-	protected Vector2 endPos;
-	private final int layer;
+	protected Vector2 startPos = new Vector2();
+	protected Vector2 endPos = new Vector2();
+	private int layer;
 
-	public TrackPiece(int layer) {
+	public void setLayer(int layer) {
 		this.layer = layer;
+	}
+	
+	public void setStartPos(float x, float y) {
+		startPos.set(x, y);
+	}
+	
+	public void setEndPos(float x, float y) {
+		endPos.set(x, y);
 	}
 
 	public int layer() {

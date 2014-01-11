@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Pool;
 
 class TrackBuilder {
 	public static final float TRACK_WIDTH = 72;
@@ -13,21 +14,38 @@ class TrackBuilder {
 	public static final int MAX_TRACK_PIECES = 100;
 	
 	private int layer;
-	private Vector2 pos;
+	private Vector2 pos = new Vector2();
 	private float angle;
 
-	private List<TrackPiece> pieces;
-	private int[] piecesByLayer;
+	private List<TrackPiece> pieces = new ArrayList<TrackPiece>();
+	private int[] piecesByLayer = new int[NUM_LAYERS];
 	
-	public TrackBuilder() {
-		this(0, 0, 0);
-	}
+	Pool<StraightPiece> straightPiecePool = new Pool<StraightPiece>() {
+		@Override
+		protected StraightPiece newObject() {
+			return new StraightPiece();
+		}
+	};
 	
-	public TrackBuilder(float x, float y, float angle) {
-		this.pos = new Vector2(x, y);
+	Pool<TurnPiece> turnPiecePool = new Pool<TurnPiece>() {
+		@Override
+		protected TurnPiece newObject() {
+			return new TurnPiece();
+		}
+	};
+		
+	public void init(float x, float y, float angle) {
+		pos.set(x, y);
 		this.angle = angle;
-		pieces = new ArrayList<TrackPiece>();
-		piecesByLayer = new int[NUM_LAYERS];
+		for (int i = pieces.size() - 1; i >= 0; i--) {
+			TrackPiece piece = pieces.remove(i);
+			if (piece instanceof StraightPiece) {
+				straightPiecePool.free((StraightPiece) piece);
+			}
+			else if (piece instanceof TurnPiece) {
+				turnPiecePool.free((TurnPiece) piece);
+			}
+		}
 		layer = 0;
 	}
 	
@@ -76,7 +94,8 @@ class TrackBuilder {
 	}
 	
 	public TrackBuilder addStraight(float length) {
-		TrackPiece piece = new StraightPiece(layer, pos, angle, length);
+		StraightPiece piece = straightPiecePool.obtain();
+		piece.set(layer, pos, angle, length);
 		pos.set(piece.positionAtEnd());
 		pieces.add(piece);
 		piecesByLayer[layer]++;
@@ -84,7 +103,8 @@ class TrackBuilder {
 	}
 	
 	public TrackBuilder addTurn(float angle, float radius) {
-		TrackPiece piece = new TurnPiece(layer, pos, this.angle, this.angle + angle, radius);
+		TurnPiece piece = turnPiecePool.obtain();
+		piece.set(layer, pos, this.angle, this.angle + angle, radius);
 		pos.set(piece.positionAtEnd());
 		this.angle += angle;
 		pieces.add(piece);

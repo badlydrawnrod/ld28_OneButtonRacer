@@ -4,29 +4,28 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 class TurnPiece extends TrackPiece {
-	private Vector2 centre;
+	private Vector2 centre = new Vector2();
 	private float startAngle;
 	private float endAngle;
 	private float radius;
 	private boolean isClockwise;
 
-	public TurnPiece(int layer, Vector2 pos, float startAngle, float endAngle, float radius) {
-		super(layer);
-		this.startPos = new Vector2(pos);
+	public void set(int layer, Vector2 pos, float startAngle, float endAngle, float radius) {
+		setLayer(layer);
+		setStartPos(pos.x, pos.y);
 		this.startAngle = normalizeAngle(startAngle);
 		this.endAngle = normalizeAngle(endAngle);
 		this.isClockwise = normalizeAngle(endAngle - startAngle) < 0;
 		this.radius = radius;
 		
 		// Find the centre of the circle that this track piece is turning around.
-		centre = new Vector2();
 		if (isClockwise) {
 			float x = pos.x + radius * MathUtils.cos(startAngle - MathUtils.PI / 2);
 			float y = pos.y + radius * MathUtils.sin(startAngle - MathUtils.PI / 2);
 			centre.set(x, y);
 			float endX = centre.x + radius * MathUtils.cos(endAngle + MathUtils.PI / 2);
 			float endY = centre.y + radius * MathUtils.sin(endAngle + MathUtils.PI / 2);
-			this.endPos = new Vector2(endX, endY);
+			setEndPos(endX, endY);
 		}
 		else {
 			float x = pos.x + radius * MathUtils.cos(startAngle + MathUtils.PI / 2);
@@ -34,7 +33,7 @@ class TurnPiece extends TrackPiece {
 			centre.set(x, y);
 			float endX = centre.x + radius * MathUtils.cos(endAngle - MathUtils.PI / 2);
 			float endY = centre.y + radius * MathUtils.sin(endAngle - MathUtils.PI / 2);
-			this.endPos = new Vector2(endX, endY);
+			setEndPos(endX, endY);
 		}
 	}
 	
