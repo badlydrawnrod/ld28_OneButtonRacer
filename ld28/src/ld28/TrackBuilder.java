@@ -46,6 +46,9 @@ class TrackBuilder {
 				turnPiecePool.free((TurnPiece) piece);
 			}
 		}
+		for (int i = 0; i < piecesByLayer.length; i++) {
+			piecesByLayer[i] = 0;
+		}
 		layer = 0;
 	}
 	
