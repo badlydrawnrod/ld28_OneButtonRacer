@@ -22,11 +22,12 @@ public class WorldRenderer {
 		this.world = world;
 		this.gameCam = gameCam;
 		trackRenderer = new TrackRenderer();
+		carRenderer = new CarRenderer();
 	}
 
 	public void onLevelStart() {
 		trackRenderer.changeTrack(world.track());
-		carRenderer = new CarRenderer(world.cars());
+		carRenderer.changeTrack(world.cars());
 	}
 	
 	public void draw() {
@@ -180,22 +181,25 @@ class TrackRenderer {
 
 
 class CarRenderer {
-	private Image carImage;
-	private Image obscuredCarImage;
-	private Image redCarImage;
-	private Image blueCarImage;
-	private Image redArrowImage;
-	private Image blueArrowImage;
+	private final Image carImage;
+	private final Image obscuredCarImage;
+	private final Image redCarImage;
+	private final Image blueCarImage;
+	private final Image redArrowImage;
+	private final Image blueArrowImage;
 	private List<Car> cars;
 
-	public CarRenderer(List<Car> cars) {
-		this.cars = cars;
+	public CarRenderer() {
 		carImage = Kernel.images.get("atlases/ld28/dronecar");
 		obscuredCarImage = Kernel.images.get("atlases/ld28/transparentcar");
 		redCarImage = Kernel.images.get("atlases/ld28/redcar");
 		blueCarImage = Kernel.images.get("atlases/ld28/bluecar");
 		redArrowImage = Kernel.images.get("atlases/ld28/redarrow");
 		blueArrowImage = Kernel.images.get("atlases/ld28/bluearrow");
+	}
+
+	public void changeTrack(List<Car> cars) {
+		this.cars = cars;
 	}
 	
 	public void draw(int layer) {
