@@ -18,11 +18,16 @@ public class WorldRenderer {
 	private TrackRenderer trackRenderer;
 	private CarRenderer carRenderer;
 
-	public WorldRenderer(World world, Camera gameCam) {
-		this.world = world;
-		this.gameCam = gameCam;
+	public WorldRenderer() {
 		trackRenderer = new TrackRenderer();
 		carRenderer = new CarRenderer();
+	}
+
+	public void init(World world, Camera camera) {
+		this.world = world;
+		this.gameCam = camera;
+		trackRenderer.init();
+		carRenderer.init();
 	}
 
 	public void onLevelStart() {
@@ -52,17 +57,20 @@ class TrackRenderer {
 	private final float[] vertices;
 	private final int[] layerStarts;
 	private final int[] layerIndexes;
-	private final Texture trackTexture;
-	private final Texture startFinishTexture;
+	private Texture trackTexture;
+	private Texture startFinishTexture;
 
 	
 	public TrackRenderer() {
-		trackTexture = Kernel.images.get("textures/track").region().getTexture();
-		startFinishTexture = Kernel.images.get("textures/startfinish").region().getTexture();
 		vertices = new float[TrackBuilder.MAX_TRACK_PIECES * QUADS_PER_PIECE * VERTS_PER_QUAD];
 		layerStarts = new int[TrackBuilder.NUM_LAYERS];
 		layerIndexes = new int[TrackBuilder.NUM_LAYERS];
 		startFinishVertices = new float[VERTS_PER_QUAD];
+	}
+	
+	public void init() {
+		trackTexture = Kernel.images.get("textures/track").region().getTexture();
+		startFinishTexture = Kernel.images.get("textures/startfinish").region().getTexture();
 	}
 
 	public void changeTrack(TrackBuilder track) {
@@ -181,15 +189,15 @@ class TrackRenderer {
 
 
 class CarRenderer {
-	private final Image carImage;
-	private final Image obscuredCarImage;
-	private final Image redCarImage;
-	private final Image blueCarImage;
-	private final Image redArrowImage;
-	private final Image blueArrowImage;
+	private Image carImage;
+	private Image obscuredCarImage;
+	private Image redCarImage;
+	private Image blueCarImage;
+	private Image redArrowImage;
+	private Image blueArrowImage;
 	private List<Car> cars;
 
-	public CarRenderer() {
+	public void init() {
 		carImage = Kernel.images.get("atlases/ld28/dronecar");
 		obscuredCarImage = Kernel.images.get("atlases/ld28/transparentcar");
 		redCarImage = Kernel.images.get("atlases/ld28/redcar");
@@ -197,7 +205,7 @@ class CarRenderer {
 		redArrowImage = Kernel.images.get("atlases/ld28/redarrow");
 		blueArrowImage = Kernel.images.get("atlases/ld28/bluearrow");
 	}
-
+	
 	public void changeTrack(List<Car> cars) {
 		this.cars = cars;
 	}

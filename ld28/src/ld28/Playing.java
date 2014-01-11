@@ -34,6 +34,7 @@ public class Playing extends State {
 	public Playing(App app) {
 		this.app = app;
 		this.isTwoPlayer = false;
+		worldRenderer = new WorldRenderer();
 	}
 	
 	public void setTwoPlayer(boolean isTwoPlayer) {
@@ -49,7 +50,7 @@ public class Playing extends State {
 		gameCam = Kernel.cameras.create("gameCam", virtualWidth, virtualHeight);
 		guiCam.setScissored(false);
 		world = new World(isTwoPlayer);
-		worldRenderer = new WorldRenderer(world, gameCam);
+		worldRenderer.init(world, gameCam);
 		soundtrack = Kernel.tunes.get("music/soundtrack");
 		soundtrack.setLooping(true);
 		soundtrack.play();
